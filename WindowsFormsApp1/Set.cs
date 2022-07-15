@@ -88,8 +88,18 @@ namespace WindowsFormsApp1
       Read.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(170)))), ((int)(((byte)(50)))));
       Read.Click += delegate
       {
-				Main.frm1.Button_read_Click();
-			};
+        /*22-07-15更改
+         * 取消使用Main.frm1.Button_read_Click()        
+         * 协议改变使用0x50命令，不可以使用全部查询命令
+         * 更改为调用函数        
+         * Main.frm1.ThreshholdValue_Set_Click();
+         */
+
+        //Main.frm1.Button_read_Click();
+
+        //阈值设置
+        Main.frm1.ThreshholdValue_Set_Click();
+      };
       Read.Parent = uiTitlePanel1;
 
 
@@ -368,8 +378,11 @@ namespace WindowsFormsApp1
       Read_1.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(170)))), ((int)(((byte)(50)))));
       Read_1.Click += delegate
       {
-				Main.frm1.Button_read_Click();
-			};
+        /*取消使用全部查询函数*/
+        //Main.frm1.Button_read_Click();
+        //校准值查询函数
+        Main.frm1.Read_CalibrationValue();
+      };
       Read_1.Parent = uiTitlePanel2;
       Eanable_1.Name = "Read";
       Eanable_1.Text = "Set";
@@ -872,7 +885,6 @@ namespace WindowsFormsApp1
       temp = Main.frm1.StructToBytes(driver_Manual_Control);
       Main.frm1.Serial_Data_Transmission(temp, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x10);
       driver_Manual_Control.Diver = Reverse(driver_Manual_Control.Diver);
-      
     }
     //一键使能设置
     private void Button_Eanble_Click()

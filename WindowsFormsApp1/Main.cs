@@ -1,4 +1,7 @@
-﻿
+﻿/*
+ *版本号：uppermasterV001B001D004
+ * 日期：22年07月13日09时41分
+ */
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -42,7 +45,8 @@ namespace WindowsFormsApp1
     public byte RACK_ID_Number_Sent; //生成要发送的RACKID
     public byte Shelf_ID_Number_Sent; //生成要发送的Shelf ID
     public byte Timer_Count;//时间定时器
-
+    public byte CMD_CalibrationValue = 0x51;//阈值设置
+    public byte CMD_ThreshholdValue  = 0x50;//校准命令
 
     public Byte[] Set_Imation_Reiving_Data = new byte[(255)]; //设置信息接收数据
     public static byte[] Flag_VoltageData = { 0x0A, 0x1D };
@@ -2239,15 +2243,29 @@ namespace WindowsFormsApp1
 
       }
     }
-    //一键读取设置
-    public void Button_read_Click()
-    {
-			byte[] Null = new byte[8];
-			 //读取参数设置所有参数设置
-      Main.frm1.Serial_Data_Transmission(Null,8,Main.frm1.RACK_ID_Number_Sent,Main.frm1.Shelf_ID_Number_Sent,0x11);
-      Main.frm1.Serial_Data_Transmission(Null, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
-    }
+    /*
+      阈值设置事件发生调用
+    */
 
+    public void ThreshholdValue_Set_Click()
+    {
+			byte[] ThreshholdValue = new byte[8];
+      ThreshholdValue[0] =  CMD_ThreshholdValue;
+      //读取阈值参数
+      Serial_Data_Transmission(ThreshholdValue, 8,Main.frm1.RACK_ID_Number_Sent,Main.frm1.Shelf_ID_Number_Sent,0x11);
+      //因为读设置有的值是通过summary传给上位机的
+      Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
+    }
+    /*
+     * 校准设置事件发生时调用
+     */
+    public void Read_CalibrationValue()
+    {
+      byte[] CalibrationValue = new byte[8];
+      CalibrationValue[1] =  CMD_CalibrationValue;
+      Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
+      Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
+    }
     public void Poll_Query(object source, System.Timers.ElapsedEventArgs e)
     {try
       {
