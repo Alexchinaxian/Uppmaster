@@ -872,6 +872,7 @@ namespace WindowsFormsApp1
       temp = Main.frm1.StructToBytes(driver_Manual_Control);
       Main.frm1.Serial_Data_Transmission(temp, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x10);
       driver_Manual_Control.Diver = Reverse(driver_Manual_Control.Diver);
+      
     }
     //一键使能设置
     private void Button_Eanble_Click()

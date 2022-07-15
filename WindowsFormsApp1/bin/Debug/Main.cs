@@ -282,7 +282,7 @@ namespace WindowsFormsApp1
       RS485_select();
       frm1 = this;
       LoadInitialization();
-		//	Timer();
+			Timer();
       Control.CheckForIllegalCrossThreadCalls = false;
       Factory_setting f = new Factory_setting(); // 首次带参数打开的Bug
     }
@@ -1182,7 +1182,8 @@ namespace WindowsFormsApp1
          Set.Set1.Textbox_Read_Calibration[6].Text =  TEMP.parameter_Read.Current_Offset.ToString();
          Set.Set1.Textbox_Read_Calibration[7].Text =  TEMP.parameter_Read.Current_Slope.ToString();
          Set.Set1.Textbox_Read_Calibration[8].Text = TEMP.parameter_Read.SOC.ToString();
-         Set.Set1.Textbox_Read_Calibration[9].Text = TEMP.parameter_Read.RTC_Mon.ToString();
+         Set.Set1.Textbox_Read_Calibration[9].Text = DateTime.Now.ToString();
+
           break;
       }
     }
@@ -2248,7 +2249,14 @@ namespace WindowsFormsApp1
     }
 
     public void Poll_Query(object source, System.Timers.ElapsedEventArgs e)
-    {
+    {try
+      {
+        Set.Set1.Textbox_set_Calibration[9].Text = DateTime.Now.ToString();
+      }
+      catch
+      {
+
+      }
       string[] a = System.IO.Ports.SerialPort.GetPortNames();
       if (SerialNuber_data.Length  != a.Length)
       {
