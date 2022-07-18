@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.IO.Ports;
 using Microsoft.Office.Interop;
+using System.Messaging;
 
 namespace WindowsFormsApp1
 {
@@ -27,26 +28,26 @@ namespace WindowsFormsApp1
     public int Signal_Send_Data = 0;
     public int count_ACK = 1;
     public int signle = 0;
-		byte[] Null = new byte[8];
-		const byte ID_RACK1 = 0x01;
-		const byte ID_RACK2 = 0x02;
-		const byte ID_RACK3 = 0x03;
-		const byte ID_Shelf1 = 0x01;
-		const byte ID_Shelf2 = 0x02;
-		const byte ID_Shelf3 = 0x03;
-		const byte ID_Shelf4 = 0x04;
-		const byte ID_Shelf5 = 0x05;
-		const byte ID_Shelf6 = 0x06;
-		const byte CMD_Summary = 0x01;
-		const byte CMD_Cell_Temperature = 0x02;
-		const byte CMD_Cell_Voltage= 0x03;
+    byte[] Null = new byte[8];
+    const byte ID_RACK1 = 0x01;
+    const byte ID_RACK2 = 0x02;
+    const byte ID_RACK3 = 0x03;
+    const byte ID_Shelf1 = 0x01;
+    const byte ID_Shelf2 = 0x02;
+    const byte ID_Shelf3 = 0x03;
+    const byte ID_Shelf4 = 0x04;
+    const byte ID_Shelf5 = 0x05;
+    const byte ID_Shelf6 = 0x06;
+    const byte CMD_Summary = 0x01;
+    const byte CMD_Cell_Temperature = 0x02;
+    const byte CMD_Cell_Voltage = 0x03;
     const byte CMD_All_Parameter_Read = 0x11;
     const byte ParameterSet = 0x12;
     public byte RACK_ID_Number_Sent; //生成要发送的RACKID
     public byte Shelf_ID_Number_Sent; //生成要发送的Shelf ID
     public byte Timer_Count;//时间定时器
     public byte CMD_CalibrationValue = 0x51;//阈值设置
-    public byte CMD_ThreshholdValue  = 0x50;//校准命令
+    public byte CMD_ThreshholdValue = 0x50;//校准命令
 
     public Byte[] Set_Imation_Reiving_Data = new byte[(255)]; //设置信息接收数据
     public static byte[] Flag_VoltageData = { 0x0A, 0x1D };
@@ -86,13 +87,15 @@ namespace WindowsFormsApp1
     0xef1f,0xff3e,0xcf5d,0xdf7c,0xaf9b,0xbfba,0x8fd9,0x9ff8,
     0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
    };
+    System.DateTime currentTime = new System.DateTime();
+
     public struct SHELF
     {
-     public Moudle_Temp moudle_Temp;  //温度
-     public Summary summary;    //概要
-     public All_Parameter_Read parameter_Read;//设置信息读取
-     public Moudle_Voltage voltage;//电压
-    };  
+      public Moudle_Temp moudle_Temp;  //温度
+      public Summary summary;    //概要
+      public All_Parameter_Read parameter_Read;//设置信息读取
+      public Moudle_Voltage voltage;//电压
+    };
     public string[] SerialNuber_data = System.IO.Ports.SerialPort.GetPortNames();
 
     public Byte[] Rack1Shelf1Summary = new byte[136];      //摘要信息的创建
@@ -102,19 +105,19 @@ namespace WindowsFormsApp1
     public struct SetStructure
     {
       public UInt16 ID;
-			public byte reseve;
+      public byte reseve;
       public byte reseve1;
-      public UInt32 Value;
+      public Int32 Value;
     };
     //调整
     enum temp1
-      {
+    {
       a = 1,
       b,
     };
     SetStructure setStructure;
     [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-   //概要信息
+    //概要信息
     public struct Summary
     {
       public UInt16 TotalVol_1;
@@ -169,64 +172,64 @@ namespace WindowsFormsApp1
     [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct All_Parameter_Read
     {
-			public UInt16 Cell_OV_Warning_Pre;
-			public UInt16 Cell_OV_Warning;
-			public UInt16 Cell_OV_Fault;
-			public UInt16 Battery_OV_Warning_Pre;
-			public UInt16 Battery_OV_Warning;
-			public UInt16 Battery_OV_Fault;
-			public UInt16 Chg_OCur_Warning_Pre;
-			public UInt16 Chg_OCur_Warning;
-			public UInt16 Chg_OCur_Fault;
-			public UInt16 Chg_Utemp_Warning_Pre;
-			public UInt16 Chg_Utemp_Warning;
-			public UInt16 Chg_Utemp_Fault;
-			public UInt16 Chg_Otemp_Warning_Pre;
-			public UInt16 Chg_Otemp_Warning;
-			public UInt16 Chg_Otemp_Fault;
-			public UInt16 Cell_UV_Warning_Pre;
-			public UInt16 Cell_UV_Warning;
-			public UInt16 Cell_UV_Fault;
-			public UInt16 Battery_UV_Warning_Pre;
-			public UInt16 Battery_UV_Warning;
-			public UInt16 Battery_UV_Fault;
-			public UInt16 DisChg_OCur_Warning_Pre;
-			public UInt16 DisChg_OCur_Warning;
-			public UInt16 DisChg_OCur_Fault;
-			public UInt16 DisChg_UTemp_Warning_Pre;
-			public UInt16 DisChg_UTemp_Warning;
-			public UInt16 DisChg_UTemp_Fault;
-			public UInt16 DisChg_Otemp_Warning_Pre;
-			public UInt16 DisChg_Otemp_Warning;
-			public UInt16 DisChg_Otemp_Fault;
-			public UInt16 SOC_Low_Warning_Pre;
-			public UInt16 SOC_Low_Warning;
-			public UInt16 SOC_Low_Fault;
-			public UInt16 V_Diff_Warning_Pre;
-			public UInt16 V_Diff_Warning;
-			public UInt16 V_Diff_Fault;
-			public UInt16 T_Diff_Warning_Pre;
-			public UInt16 T_Diff_Warning;
-			public UInt16 T_Diff_Fault;
-			//预留3组位置
-			public UInt16 reserved1;
-			public UInt16 reserved2;
-			public UInt16 reserved3;
-			public UInt16 reserved4;
-			public UInt16 reserved5;
-			public UInt16 reserved6;
-			public UInt16 reserved7;
-			public UInt16 reserved8;
-			public UInt16 reserved9;
-			//参数校准参数
-			public UInt16 TotalVol_1_Slope;
-			public UInt16 TotalVol_1_Offset;
-			public UInt16 TotalVol_2_Slope;
-			public UInt16 TotalVol_2_Offset;
-			public UInt16 TotalVol_3_Slope;
-			public UInt16 TotalVol_3_Offset;
-			public UInt16 Current_Slope;
-			public UInt16 Current_Offset;
+      public UInt16 Cell_OV_Warning_Pre;
+      public UInt16 Cell_OV_Warning;
+      public UInt16 Cell_OV_Fault;
+      public UInt16 Battery_OV_Warning_Pre;
+      public UInt16 Battery_OV_Warning;
+      public UInt16 Battery_OV_Fault;
+      public UInt16 Chg_OCur_Warning_Pre;
+      public UInt16 Chg_OCur_Warning;
+      public UInt16 Chg_OCur_Fault;
+      public UInt16 Chg_Utemp_Warning_Pre;
+      public UInt16 Chg_Utemp_Warning;
+      public UInt16 Chg_Utemp_Fault;
+      public UInt16 Chg_Otemp_Warning_Pre;
+      public UInt16 Chg_Otemp_Warning;
+      public UInt16 Chg_Otemp_Fault;
+      public UInt16 Cell_UV_Warning_Pre;
+      public UInt16 Cell_UV_Warning;
+      public UInt16 Cell_UV_Fault;
+      public UInt16 Battery_UV_Warning_Pre;
+      public UInt16 Battery_UV_Warning;
+      public UInt16 Battery_UV_Fault;
+      public UInt16 DisChg_OCur_Warning_Pre;
+      public UInt16 DisChg_OCur_Warning;
+      public UInt16 DisChg_OCur_Fault;
+      public UInt16 DisChg_UTemp_Warning_Pre;
+      public UInt16 DisChg_UTemp_Warning;
+      public UInt16 DisChg_UTemp_Fault;
+      public UInt16 DisChg_Otemp_Warning_Pre;
+      public UInt16 DisChg_Otemp_Warning;
+      public UInt16 DisChg_Otemp_Fault;
+      public UInt16 SOC_Low_Warning_Pre;
+      public UInt16 SOC_Low_Warning;
+      public UInt16 SOC_Low_Fault;
+      public UInt16 V_Diff_Warning_Pre;
+      public UInt16 V_Diff_Warning;
+      public UInt16 V_Diff_Fault;
+      public UInt16 T_Diff_Warning_Pre;
+      public UInt16 T_Diff_Warning;
+      public UInt16 T_Diff_Fault;
+      //预留3组位置
+      public UInt16 reserved1;
+      public UInt16 reserved2;
+      public UInt16 reserved3;
+      public UInt16 reserved4;
+      public UInt16 reserved5;
+      public UInt16 reserved6;
+      public UInt16 reserved7;
+      public UInt16 reserved8;
+      public UInt16 reserved9;
+      //参数校准参数
+      public UInt16 TotalVol_1_Slope;
+      public UInt16 TotalVol_1_Offset;
+      public UInt16 TotalVol_2_Slope;
+      public UInt16 TotalVol_2_Offset;
+      public UInt16 TotalVol_3_Slope;
+      public UInt16 TotalVol_3_Offset;
+      public UInt16 Current_Slope;
+      public UInt16 Current_Offset;
       public UInt16 SOC;
       public UInt16 RTC_Y;
       public UInt16 RTC_Mon;
@@ -252,7 +255,7 @@ namespace WindowsFormsApp1
       public UInt32 Project_Code;
 
     };
-  
+
     //电压信息定义
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Moudle_Voltage
@@ -275,7 +278,7 @@ namespace WindowsFormsApp1
                                 0x0D,0x0E,0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,
                                 0x1A,0x1B,0x1C,0x1D,0x1E,0x1F,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27
     };
-    public byte[] SendSetCMDID1 = {0xA0,0xA1,0xA2,0xA3,0xA4,0xA5,0xA6,0xA7,0xA8,0xA9    };
+    public byte[] SendSetCMDID1 = { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7, 0xA8, 0xA9 };
     public delegate void printString(SHELF a);
     public Main()
     {
@@ -286,7 +289,7 @@ namespace WindowsFormsApp1
       RS485_select();
       frm1 = this;
       LoadInitialization();
-			Timer();
+      Timer();
       Control.CheckForIllegalCrossThreadCalls = false;
       Factory_setting f = new Factory_setting(); // 首次带参数打开的Bug
     }
@@ -403,7 +406,7 @@ namespace WindowsFormsApp1
     }
     private void Timer()
     {
-      System.Timers.Timer t = new System.Timers.Timer(300);//实例化Timer类，设置间隔时间为500毫秒；
+      System.Timers.Timer t = new System.Timers.Timer(400);//实例化Timer类，设置间隔时间为500毫秒；
       t.Elapsed += new System.Timers.ElapsedEventHandler(Poll_Query);//到达时间的时候执行事件；
       t.AutoReset = true;//设置是执行一次（false）还是一直执行(true)；
       t.Enabled = true;//是否执行System.Timers.Timer.Elapsed事件；
@@ -434,11 +437,11 @@ namespace WindowsFormsApp1
         //None
       }
     }
-	/************************************************************************ 	
-    *name:	CRC
-    *describe: CRC校验
-    *data : 2022.5.5 Alex
-    *************************************************************************/
+    /************************************************************************ 	
+      *name:	CRC
+      *describe: CRC校验
+      *data : 2022.5.5 Alex
+      *************************************************************************/
 
     public static UInt16 calCRC16(byte[] dataIn, int length)
     {
@@ -449,12 +452,12 @@ namespace WindowsFormsApp1
         nAccum = (UInt16)((nAccum << 8) ^ (UInt16)CRC16Table[(nAccum >> 8) ^ dataIn[i]]);
       return nAccum;
     }
-	/************************************************************************		
-    *name:  getCheckSum
-    *describe: 
-    * *data : 2022.3.29 Alex
-    *************************************************************************/
-	public static byte getCheckSum(byte[] packBytes, int length)
+    /************************************************************************		
+      *name:  getCheckSum
+      *describe: 
+      * *data : 2022.3.29 Alex
+      *************************************************************************/
+    public static byte getCheckSum(byte[] packBytes, int length)
     {
       UInt64 checkSum = 0x0024;
       for (int i = 0; i < length; i++)
@@ -482,11 +485,11 @@ namespace WindowsFormsApp1
       childForm.BringToFront();
       childForm.Show();
     }
-	/************************************************************************		
-    *name:  Reverse
-    *describe: 所有大小端转化
-    *data : 2022.5.5 Alex
-    *************************************************************************/
+    /************************************************************************		
+      *name:  Reverse
+      *describe: 所有大小端转化
+      *data : 2022.5.5 Alex
+      *************************************************************************/
     public static long Reverse(long value)
     {
       return (((long)Reverse((int)value) & 0xFFFFFFFF) << 32)
@@ -535,10 +538,10 @@ namespace WindowsFormsApp1
           serialPort1.Write(Text_M);
           textBox1.AppendText("Send:" + Text_M + "\r\n");
         }
-				else
-				{
-					//None;
-				}
+        else
+        {
+          //None;
+        }
       }
       catch (Exception ex)
       {
@@ -547,11 +550,11 @@ namespace WindowsFormsApp1
         MessageBox.Show(ex.Message);
       }
     }
-	/************************************************************************		
-    *name: data_processing
-    *describe: 转换成浮点
-    *data : 2022.4.18 Alex
-    *************************************************************************/
+    /************************************************************************		
+      *name: data_processing
+      *describe: 转换成浮点
+      *data : 2022.4.18 Alex
+      *************************************************************************/
     private float data_processing(short temp)
     {
       float data = (float)temp;
@@ -587,12 +590,12 @@ namespace WindowsFormsApp1
       }
       return (data & x) == x ? 1 : 0;
     }
-	/************************************************************************		
-    *name:  UintGetBit
-    *describe: Uint拆成位的函数
-    *data : 2022.4.18 Alex
-    * 
-    *************************************************************************/
+    /************************************************************************		
+      *name:  UintGetBit
+      *describe: Uint拆成位的函数
+      *data : 2022.4.18 Alex
+      * 
+      *************************************************************************/
     public static int UintGetBit(uint data, short index)
     {
       uint x = 1;
@@ -628,12 +631,12 @@ namespace WindowsFormsApp1
       }
       return (data & x) == x ? 1 : 0;
     }
-	/************************************************************************		
-    *name:  StructToBytes
-    *describe: 结构体转数组
-    *data : 2022.3.29 Alex
-    *************************************************************************/
-	public byte[] StructToBytes(object anyStruct)
+    /************************************************************************		
+      *name:  StructToBytes
+      *describe: 结构体转数组
+      *data : 2022.3.29 Alex
+      *************************************************************************/
+    public byte[] StructToBytes(object anyStruct)
     {
       int size = Marshal.SizeOf(anyStruct);
       IntPtr bytesPtr = Marshal.AllocHGlobal(size);
@@ -643,24 +646,27 @@ namespace WindowsFormsApp1
       Marshal.FreeHGlobal(bytesPtr);
       return bytes;
     }
-	/************************************************************************		
-    *name:  BytesToDataStruct
-    *describe:数组转结构体 A = (object)BytesToDataStruct(byte[] bytes, Type type);
-    *data : 2022.5.5 Alex
-    *************************************************************************/
-		private object BytesToDataStruct(byte[] bytes, Type type)
-		{
+    /************************************************************************		
+      *name:  BytesToDataStruct
+      *describe:数组转结构体 A = (object)BytesToDataStruct(byte[] bytes, Type type);
+      *data : 2022.5.5 Alex
+      *************************************************************************/
+    private object BytesToDataStruct(byte[] bytes, Type type)
+    {
       int size = Marshal.SizeOf(type);
-				if (size > bytes.Length)
-				{
-						return null;
-				}
-				IntPtr structPtr = Marshal.AllocHGlobal(size);
-				Marshal.Copy(bytes, 0, structPtr, size);
-				object obj = Marshal.PtrToStructure(structPtr, type);
-				Marshal.FreeHGlobal(structPtr);
-				return obj;
-		}
+      if (size > bytes.Length)
+      {
+        return null;
+      }
+      IntPtr structPtr = Marshal.AllocHGlobal(size);
+      Marshal.Copy(bytes, 0, structPtr, size);
+      object obj = Marshal.PtrToStructure(structPtr, type);
+      Marshal.FreeHGlobal(structPtr);
+      return obj; 
+    }
+
+
+
 
     public bool SendPacketAck(byte[] buffer, int len)
     {
@@ -668,10 +674,9 @@ namespace WindowsFormsApp1
       {
         MessageBox.Show("Please open the serial port." + "\r\n");
       }
-        lastSentOpcode = buffer[1];
-        
-        serialPort1.Write(buffer, 0, len);
-        Thread.Sleep(80);
+      lastSentOpcode = buffer[1];
+      serialPort1.Write(buffer, 0, len);
+      Thread.Sleep(50);
       if (ackRcvd.WaitOne(50))
       {
         return true;
@@ -853,11 +858,11 @@ namespace WindowsFormsApp1
       }
     }
 
-	/************************************************************************		
-    *name:  Send_Data
-    *describe: 更新程序发送函数
-    *data : 2022.4.1 Alex
-    *************************************************************************/
+    /************************************************************************		
+      *name:  Send_Data
+      *describe: 更新程序发送函数
+      *data : 2022.4.1 Alex
+      *************************************************************************/
     public void Send_Data()
     {
       byte COMMAND_SEND_DATA = 0xFF;
@@ -895,26 +900,26 @@ namespace WindowsFormsApp1
               else // readjust size (this is the last chunk!)
               {
                 Array.ConstrainedCopy(dataBuffer, 0, packetBuffer, 4, 128);
-              //packetBuffer[0] = (byte)(bytesRead + 3); // readjust size byte
-                                                         //  Form_DownLoad.frm_2.progressBa_value(99);
+                //packetBuffer[0] = (byte)(bytesRead + 3); // readjust size byte
+                //  Form_DownLoad.frm_2.progressBa_value(99);
               }
             }
             packetBuffer[0] = 0x01;
             packetBuffer[1] = 0x10;
             packetBuffer[2] = 0x60;
             packetBuffer[3] = 0x06;
-           // packetBuffer[1] = getCheckSum(dataBuffer, 252);
-           // packetBuffer[2] = 0x24;
+            // packetBuffer[1] = getCheckSum(dataBuffer, 252);
+            // packetBuffer[2] = 0x24;
             Main.frm1.SendPacketAck(packetBuffer, 134);
             textBox1.AppendText("Downloading..." + "\r\n");
             // Thread.Sleep(1);//休眠时间
-           // SendPacketAck(COMMAND_GET_STATUS, 4);
+            // SendPacketAck(COMMAND_GET_STATUS, 4);
             Form_DownLoad.frm_2.ProgressBa_value((int)reader.BaseStream.Position);
           }
         }
         Thread.Sleep(300);//休眠时间
-        
-        var temp_1 = new byte[7] { 0x01, 0x06, 0x60,0x00,0x0b,0x11,0x22 };
+
+        var temp_1 = new byte[7] { 0x01, 0x06, 0x60, 0x00, 0x0b, 0x11, 0x22 };
         SendPacketAck(temp_1, 7);
         textBox1.AppendText(" Completed!" + "\r\n");
         MessageBox.Show(" Completed!" + "\r\n");
@@ -924,12 +929,12 @@ namespace WindowsFormsApp1
       }
     }
 
-	/************************************************************************		
-    *name:  Serial_Data_Transmission
-    *describe: 发送数据函数（处理报文长度帧头等协议规则）
-    *data : 2022.5.5 Alex
-    *************************************************************************/
-		public void Serial_Data_Transmission(byte[] buffer, byte len,byte RackID ,byte ShelfID,byte CMD )
+    /************************************************************************		
+      *name:  Serial_Data_Transmission
+      *describe: 发送数据函数（处理报文长度帧头等协议规则）
+      *data : 2022.5.5 Alex
+      *************************************************************************/
+    public void Serial_Data_Transmission(byte[] buffer, byte len, byte RackID, byte ShelfID, byte CMD)
     {
       if (serialPort1.IsOpen)
       {
@@ -954,18 +959,18 @@ namespace WindowsFormsApp1
 
       }
 
-		}
+    }
     public void ShowchilidFromData(int a)
     {
 
     }
 
-    public void RACKShelf_Cele_Vol_decribe(SHELF TEMP,int ID)
+    public void RACKShelf_Cele_Vol_decribe(SHELF TEMP, int ID)
     {
       //结构体转化将
       TEMP.voltage = (Moudle_Voltage)BytesToDataStruct(Rack1Shelf1Voltage, typeof(Moudle_Voltage));
       switch (ID)
-      { 
+      {
         //RACK1Shlef1
         case 0x0101:
           #region
@@ -1005,8 +1010,8 @@ namespace WindowsFormsApp1
               }
             }
           }
-            #endregion
-            break;
+          #endregion
+          break;
         case 0x0102:
           #region
 
@@ -1047,9 +1052,9 @@ namespace WindowsFormsApp1
           }
           #endregion
           break;
-      } 
+      }
     }
-    public void Parameter_Read(SHELF TEMP,int ID)
+    public void Parameter_Read(SHELF TEMP, int ID)
     {
       TEMP.parameter_Read = (All_Parameter_Read)BytesToDataStruct(Rack1Shelf1Parameter, typeof(All_Parameter_Read));
 
@@ -1125,68 +1130,72 @@ namespace WindowsFormsApp1
       switch (ID)
       {
         case 0x0101:
-         Set.Set1.TextboxThreshold_Read[0].Text = TEMP.parameter_Read.Cell_OV_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[1].Text =  TEMP.parameter_Read.Cell_OV_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[2].Text = TEMP.parameter_Read.Cell_OV_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[0].Text = TEMP.parameter_Read.Cell_OV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[1].Text = TEMP.parameter_Read.Cell_OV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[2].Text = TEMP.parameter_Read.Cell_OV_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[3].Text =  TEMP.parameter_Read.Battery_OV_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[4].Text =  TEMP.parameter_Read.Battery_OV_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[5].Text =  TEMP.parameter_Read.Battery_OV_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[3].Text = TEMP.parameter_Read.Battery_OV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[4].Text = TEMP.parameter_Read.Battery_OV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[5].Text = TEMP.parameter_Read.Battery_OV_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[6].Text =  TEMP.parameter_Read.Chg_OCur_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[7].Text =  TEMP.parameter_Read.Chg_OCur_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[8].Text =  TEMP.parameter_Read.Chg_OCur_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[6].Text = TEMP.parameter_Read.Chg_OCur_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[7].Text = TEMP.parameter_Read.Chg_OCur_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[8].Text = TEMP.parameter_Read.Chg_OCur_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[9].Text =  TEMP.parameter_Read.Chg_Utemp_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[10].Text =  TEMP.parameter_Read.Chg_Utemp_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[11].Text =  TEMP.parameter_Read.Chg_Utemp_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[9].Text = TEMP.parameter_Read.Chg_Utemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[10].Text = TEMP.parameter_Read.Chg_Utemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[11].Text = TEMP.parameter_Read.Chg_Utemp_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[12].Text =  TEMP.parameter_Read.Chg_Otemp_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[13].Text =  TEMP.parameter_Read.Chg_Otemp_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[14].Text =  TEMP.parameter_Read.Chg_Otemp_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[12].Text = TEMP.parameter_Read.Chg_Otemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[13].Text = TEMP.parameter_Read.Chg_Otemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[14].Text = TEMP.parameter_Read.Chg_Otemp_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[15].Text =  TEMP.parameter_Read.Cell_UV_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[16].Text =  TEMP.parameter_Read.Cell_UV_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[17].Text =  TEMP.parameter_Read.Cell_UV_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[15].Text = TEMP.parameter_Read.Cell_UV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[16].Text = TEMP.parameter_Read.Cell_UV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[17].Text = TEMP.parameter_Read.Cell_UV_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[18].Text =  TEMP.parameter_Read.Battery_UV_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[19].Text =  TEMP.parameter_Read.Battery_UV_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[20].Text =  TEMP.parameter_Read.Battery_UV_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[18].Text = TEMP.parameter_Read.Battery_UV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[19].Text = TEMP.parameter_Read.Battery_UV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[20].Text = TEMP.parameter_Read.Battery_UV_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[21].Text =  TEMP.parameter_Read.DisChg_OCur_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[22].Text =  TEMP.parameter_Read.DisChg_OCur_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[23].Text =  TEMP.parameter_Read.DisChg_OCur_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[21].Text = TEMP.parameter_Read.DisChg_OCur_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[22].Text = TEMP.parameter_Read.DisChg_OCur_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[23].Text = TEMP.parameter_Read.DisChg_OCur_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[24].Text =  TEMP.parameter_Read.DisChg_UTemp_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[25].Text =  TEMP.parameter_Read.DisChg_UTemp_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[26].Text =  TEMP.parameter_Read.DisChg_UTemp_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[24].Text = TEMP.parameter_Read.DisChg_UTemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[25].Text = TEMP.parameter_Read.DisChg_UTemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[26].Text = TEMP.parameter_Read.DisChg_UTemp_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[27].Text =  TEMP.parameter_Read.DisChg_Otemp_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[28].Text =  TEMP.parameter_Read.DisChg_Otemp_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[29].Text =  TEMP.parameter_Read.DisChg_Otemp_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[27].Text = TEMP.parameter_Read.DisChg_Otemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[28].Text = TEMP.parameter_Read.DisChg_Otemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[29].Text = TEMP.parameter_Read.DisChg_Otemp_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[30].Text =  TEMP.parameter_Read.SOC_Low_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[31].Text =  TEMP.parameter_Read.SOC_Low_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[32].Text =  TEMP.parameter_Read.SOC_Low_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[30].Text = TEMP.parameter_Read.SOC_Low_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[31].Text = TEMP.parameter_Read.SOC_Low_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[32].Text = TEMP.parameter_Read.SOC_Low_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[33].Text =  TEMP.parameter_Read.V_Diff_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[34].Text =  TEMP.parameter_Read.V_Diff_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[35].Text =  TEMP.parameter_Read.V_Diff_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[33].Text = TEMP.parameter_Read.V_Diff_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[34].Text = TEMP.parameter_Read.V_Diff_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[35].Text = TEMP.parameter_Read.V_Diff_Fault.ToString();
 
-         Set.Set1.TextboxThreshold_Read[36].Text =  TEMP.parameter_Read.T_Diff_Warning_Pre.ToString();
-         Set.Set1.TextboxThreshold_Read[37].Text =  TEMP.parameter_Read.T_Diff_Warning.ToString();
-         Set.Set1.TextboxThreshold_Read[38].Text =  TEMP.parameter_Read.T_Diff_Fault.ToString();
+          Set.Set1.TextboxThreshold_Read[36].Text = TEMP.parameter_Read.T_Diff_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[37].Text = TEMP.parameter_Read.T_Diff_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[38].Text = TEMP.parameter_Read.T_Diff_Fault.ToString();
           //校准参数设置
-         Set.Set1.Textbox_Read_Calibration[0].Text =  TEMP.parameter_Read.TotalVol_1_Offset.ToString();
-         Set.Set1.Textbox_Read_Calibration[1].Text =  TEMP.parameter_Read.TotalVol_1_Slope.ToString();
-         Set.Set1.Textbox_Read_Calibration[2].Text =  TEMP.parameter_Read.TotalVol_2_Offset.ToString();
-         Set.Set1.Textbox_Read_Calibration[3].Text =  TEMP.parameter_Read.TotalVol_2_Slope.ToString();
-         Set.Set1.Textbox_Read_Calibration[4].Text =  TEMP.parameter_Read.TotalVol_3_Offset.ToString();
-         Set.Set1.Textbox_Read_Calibration[5].Text =  TEMP.parameter_Read.TotalVol_3_Slope.ToString();
-         Set.Set1.Textbox_Read_Calibration[6].Text =  TEMP.parameter_Read.Current_Offset.ToString();
-         Set.Set1.Textbox_Read_Calibration[7].Text =  TEMP.parameter_Read.Current_Slope.ToString();
-         Set.Set1.Textbox_Read_Calibration[8].Text = TEMP.parameter_Read.SOC.ToString();
-         Set.Set1.Textbox_Read_Calibration[9].Text = DateTime.Now.ToString();
+          Set.Set1.Textbox_Read_Calibration[0].Text = TEMP.parameter_Read.TotalVol_1_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[1].Text = TEMP.parameter_Read.TotalVol_1_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[2].Text = TEMP.parameter_Read.TotalVol_2_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[3].Text = TEMP.parameter_Read.TotalVol_2_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[4].Text = TEMP.parameter_Read.TotalVol_3_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[5].Text = TEMP.parameter_Read.TotalVol_3_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[6].Text = TEMP.parameter_Read.Current_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[7].Text = TEMP.parameter_Read.Current_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[8].Text = TEMP.parameter_Read.SOC.ToString();
+          Set.Set1.Textbox_Read_Calibration[9].Text = TEMP.parameter_Read.RTC_Y.ToString() + TEMP.parameter_Read.RTC_Mon.ToString() +
+        TEMP.parameter_Read.RTC_D.ToString() + TEMP.parameter_Read.RTC_H.ToString() + TEMP.parameter_Read.RTC_Min.ToString() +
+             TEMP.parameter_Read.RTC_S.ToString();
+
+
 
           break;
       }
@@ -1194,100 +1203,100 @@ namespace WindowsFormsApp1
     public void SetLightShow(SHELF teme)
     {
       teme.summary = (Summary)BytesToDataStruct(Rack1Shelf1Summary, typeof(Summary));
-      teme.summary.Drive_Status = Reverse(teme.summary.Drive_Status); 	//驱动状态
-          //LED1灯的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 3) == 0)
-          {
-            Set.Set1.Drive_Lights[0].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[0].OnColor = Color.Green;
-          }
-          //LED2灯的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 4) == 0)
-          {
-            Set.Set1.Drive_Lights[3].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[3].OnColor = Color.Green;
-          }
-          //LED3灯的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 5) == 0)
-          {
-            Set.Set1.Drive_Lights[6].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[6].OnColor = Color.Green;
-          }
-          //LED4灯的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 6) == 0)
-          {
-            Set.Set1.Drive_Lights[9].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[9].OnColor = Color.Green;
-          }
-          //风机1的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 7) == 0)
-          {
-            Set.Set1.Drive_Lights[1].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[1].OnColor = Color.Green;
-          }
-          //风机2的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 8) == 0)
-          {
-            Set.Set1.Drive_Lights[4].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[4].OnColor = Color.Green;
-          }
-          //风机3的状态
-          if (ShortGetBit(teme.summary.Drive_Status, 9) == 0)
-          {
-            Set.Set1.Drive_Lights[7].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[7].OnColor = Color.Green;
-          }
-          //MPC状态
-          if (ShortGetBit(teme.summary.Drive_Status, 0) == 0)
-          {
-            Set.Set1.Drive_Lights[2].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[2].OnColor = Color.Green;
-          }
-          //MNC状态
-          if (ShortGetBit(teme.summary.Drive_Status, 1) == 0)
-          {
-            Set.Set1.Drive_Lights[5].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[5].OnColor = Color.Green;
-          }
-          //PCC 状态
-          if (ShortGetBit(teme.summary.Drive_Status, 2) == 0)
-          {
-            Set.Set1.Drive_Lights[8].OnColor = Color.Gray;
-          }
-          else
-          {
-            Set.Set1.Drive_Lights[8].OnColor = Color.Green;
-          }
- 
+      teme.summary.Drive_Status = Reverse(teme.summary.Drive_Status);   //驱动状态
+                                                                        //LED1灯的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 3) == 0)
+      {
+        Set.Set1.Drive_Lights[0].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[0].OnColor = Color.Green;
+      }
+      //LED2灯的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 4) == 0)
+      {
+        Set.Set1.Drive_Lights[3].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[3].OnColor = Color.Green;
+      }
+      //LED3灯的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 5) == 0)
+      {
+        Set.Set1.Drive_Lights[6].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[6].OnColor = Color.Green;
+      }
+      //LED4灯的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 6) == 0)
+      {
+        Set.Set1.Drive_Lights[9].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[9].OnColor = Color.Green;
+      }
+      //风机1的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 7) == 0)
+      {
+        Set.Set1.Drive_Lights[1].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[1].OnColor = Color.Green;
+      }
+      //风机2的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 8) == 0)
+      {
+        Set.Set1.Drive_Lights[4].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[4].OnColor = Color.Green;
+      }
+      //风机3的状态
+      if (ShortGetBit(teme.summary.Drive_Status, 9) == 0)
+      {
+        Set.Set1.Drive_Lights[7].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[7].OnColor = Color.Green;
+      }
+      //MPC状态
+      if (ShortGetBit(teme.summary.Drive_Status, 0) == 0)
+      {
+        Set.Set1.Drive_Lights[2].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[2].OnColor = Color.Green;
+      }
+      //MNC状态
+      if (ShortGetBit(teme.summary.Drive_Status, 1) == 0)
+      {
+        Set.Set1.Drive_Lights[5].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[5].OnColor = Color.Green;
+      }
+      //PCC 状态
+      if (ShortGetBit(teme.summary.Drive_Status, 2) == 0)
+      {
+        Set.Set1.Drive_Lights[8].OnColor = Color.Gray;
+      }
+      else
+      {
+        Set.Set1.Drive_Lights[8].OnColor = Color.Green;
+      }
+
     }
-    public void RACKShelf_Summary_decribe(SHELF TEMP,int ID)
+    public void RACKShelf_Summary_decribe(SHELF TEMP, int ID)
     {
       //接收到信息赋值给结构体
       TEMP.summary = (Summary)BytesToDataStruct(Rack1Shelf1Summary, typeof(Summary));
@@ -1645,7 +1654,7 @@ namespace WindowsFormsApp1
             Shelf1.frm_Shelf1.Textbox_Summary[21].Text = Convert.ToString(TEMP.summary.MBB6_Balance_Stas, 2);
             Shelf1.frm_Shelf1.Textbox_Summary[22].Text = (TEMP.summary.FW_version).ToString();
             Shelf1.frm_Shelf1.Textbox_Summary[23].Text = (TEMP.summary.HW_version).ToString();
-            Shelf1.frm_Shelf1.Textbox_Summary[24].Text = TEMP.summary.RTC_Y.ToString() + "." + TEMP.summary.RTC_MON.ToString() + "." +TEMP.summary.RTC_D.ToString() + "." + TEMP.summary.RTC_H.ToString() + ":" + TEMP.summary.RTC_MIN.ToString() + ":" +
+            Shelf1.frm_Shelf1.Textbox_Summary[24].Text = TEMP.summary.RTC_Y.ToString() + "." + TEMP.summary.RTC_MON.ToString() + "." + TEMP.summary.RTC_D.ToString() + "." + TEMP.summary.RTC_H.ToString() + ":" + TEMP.summary.RTC_MIN.ToString() + ":" +
                  TEMP.summary.RTC_S.ToString();
             //故障页的处理
             for (short i = 0; i < 24; i++)
@@ -1672,12 +1681,12 @@ namespace WindowsFormsApp1
           #endregion
       }
     }
-    private void RACKShelf_Cell_Temp_decribe(SHELF TEMP,int ID)
+    private void RACKShelf_Cell_Temp_decribe(SHELF TEMP, int ID)
     {
-      TEMP.moudle_Temp = (Moudle_Temp)BytesToDataStruct(Rack1Shelf1Temperature , typeof(Moudle_Temp));
+      TEMP.moudle_Temp = (Moudle_Temp)BytesToDataStruct(Rack1Shelf1Temperature, typeof(Moudle_Temp));
       #region
       switch (ID)
-      {    
+      {
         //RACK1Shlef1
         case 0x0101:
           {
@@ -1720,9 +1729,9 @@ namespace WindowsFormsApp1
                 }
               }
           }
-            break;
+          break;
 
-            case 0x0102:
+        case 0x0102:
           {
             if (Shelf2.frm_Shelf2.Visible == true)
               for (int i = 0; i < 7; i++)
@@ -1761,7 +1770,8 @@ namespace WindowsFormsApp1
 
                 }
               }
-          }break;
+          }
+          break;
       }
       #endregion
     }
@@ -1940,11 +1950,11 @@ namespace WindowsFormsApp1
     {
 
     }
-    private void Send_Query_Command(byte RACK,byte Shelf)
+    private void Send_Query_Command(byte RACK, byte Shelf)
     {
-        Serial_Data_Transmission(Null, 8, RACK, Shelf, 0x01);  //读取摘要
-        Serial_Data_Transmission(Null, 8, RACK, Shelf, 0x02);  //读取温度
-        Serial_Data_Transmission(Null, 8, RACK, Shelf, 0x03);	//读取温度
+      Serial_Data_Transmission(Null, 8, RACK, Shelf, 0x01);  //读取摘要
+      Serial_Data_Transmission(Null, 8, RACK, Shelf, 0x02);  //读取温度
+      Serial_Data_Transmission(Null, 8, RACK, Shelf, 0x03);	//读取温度
     }
     private void button_Connect_Click_1(object sender, EventArgs e)
     {
@@ -2034,9 +2044,9 @@ namespace WindowsFormsApp1
         comboBox_SerialNumber.Enabled = true;
       }
     }
-    private void ShowFactory_setting(int a,int b)
+    private void ShowFactory_setting(int a, int b)
     {
-      if (RACK_ID_Number_Sent==1 && RACK_ID_Number_Sent==1)
+      if (RACK_ID_Number_Sent == 1 && RACK_ID_Number_Sent == 1)
       {
         Factory_setting.factory_Setting.Textbox_Read_Calibration[1].Text = RACK1SHLE1.parameter_Read.BMS_SN.ToString();
         Factory_setting.factory_Setting.Textbox_Read_Calibration[2].Text = RACK1SHLE1.parameter_Read.Cell_Type.ToString();
@@ -2249,10 +2259,11 @@ namespace WindowsFormsApp1
 
     public void ThreshholdValue_Set_Click()
     {
-			byte[] ThreshholdValue = new byte[8];
-      ThreshholdValue[0] =  CMD_ThreshholdValue;
+      byte[] ThreshholdValue = new byte[8];
+      ThreshholdValue[0] = CMD_ThreshholdValue;
       //读取阈值参数
-      Serial_Data_Transmission(ThreshholdValue, 8,Main.frm1.RACK_ID_Number_Sent,Main.frm1.Shelf_ID_Number_Sent,0x11);
+      Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
+      Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
       //因为读设置有的值是通过summary传给上位机的
       Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
     }
@@ -2262,21 +2273,24 @@ namespace WindowsFormsApp1
     public void Read_CalibrationValue()
     {
       byte[] CalibrationValue = new byte[8];
-      CalibrationValue[1] =  CMD_CalibrationValue;
+      CalibrationValue[1] = CMD_CalibrationValue;
+      Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
+      Thread.Sleep(250);//休眠时间
       Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
       Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
     }
     public void Poll_Query(object source, System.Timers.ElapsedEventArgs e)
-    {try
+    {
+      try
       {
-        Set.Set1.Textbox_set_Calibration[9].Text = DateTime.Now.ToString();
+        currentTime = System.DateTime.Now;
       }
       catch
       {
 
       }
       string[] a = System.IO.Ports.SerialPort.GetPortNames();
-      if (SerialNuber_data.Length  != a.Length)
+      if (SerialNuber_data.Length != a.Length)
       {
         SerialNuber_data = System.IO.Ports.SerialPort.GetPortNames();
         comboBox_SerialNumber.Items.Clear();
@@ -2285,45 +2299,70 @@ namespace WindowsFormsApp1
       }
 
       Timer_Count++;
-      if (Timer_Count == 40)
+      if (Timer_Count == 16)
       {
         Timer_Count = 1;
       }
       //chaxunzhiling(Timer_Count);
-      Rotation_query();
+      Rotation_query(Timer_Count);
     }
 
     //单shelf
-    public void Rotation_query()
+    public void Rotation_query(byte i)
     {
-      Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x03);  //温度
-      Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x02);  //读取电压
-      Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x01);  //读取摘要
+      if( i == 5)
+      {
+        Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x03);  //温度
+      }
+      else if(i == 10)
+      {
+        Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x02);  //读取电压
+      }
+      else if (i == 15){
+        Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x01);  //读取摘要
+      }
+      else
+      {
+        
+      }
     }
-  public void chaxunzhiling(byte i)
-  {
-    if (i < 8)
+    public void chaxunzhiling(byte i)
     {
+      if (i < 8)
+      {
         Serial_Data_Transmission(Null, 8, 0x01, i, 0x03);  //温度
         Serial_Data_Transmission(Null, 8, 0x01, i, 0x02);  //读取电压
         Serial_Data_Transmission(Null, 8, 0x01, i, 0x01);  //读取摘要
-    }
-    else if (i < 24)
-    {
-      Serial_Data_Transmission(Null, 8, 0x02, (byte)(i - 0x08), 0x01);  //读取摘要
-      Serial_Data_Transmission(Null, 8, 0x02, (byte)(i - 0x08), 0x02);  //读取摘要
-      Serial_Data_Transmission(Null, 8, 0x02, (byte)(i - 0x08), 0x03);  //读取摘要
+      }
+      else if (i < 24)
+      {
+        Serial_Data_Transmission(Null, 8, 0x02, (byte)(i - 0x08), 0x01);  //读取摘要
+        Serial_Data_Transmission(Null, 8, 0x02, (byte)(i - 0x08), 0x02);  //读取摘要
+        Serial_Data_Transmission(Null, 8, 0x02, (byte)(i - 0x08), 0x03);  //读取摘要
       }
       else if (i < 40)
-    {
-      Serial_Data_Transmission(Null, 8, 0x03, (byte)(i - 0x18), 0x01);  //读取摘要
-      Serial_Data_Transmission(Null, 8, 0x03, (byte)(i - 0x18), 0x02);  //读取摘要
-      Serial_Data_Transmission(Null, 8, 0x03, (byte)(i - 0x18), 0x03);  //读取摘要
-    }
+      {
+        Serial_Data_Transmission(Null, 8, 0x03, (byte)(i - 0x18), 0x01);  //读取摘要
+        Serial_Data_Transmission(Null, 8, 0x03, (byte)(i - 0x18), 0x02);  //读取摘要
+        Serial_Data_Transmission(Null, 8, 0x03, (byte)(i - 0x18), 0x03);  //读取摘要
+      }
       else
-    {
+      {
+      }
     }
-  }
+    public void Buttons_RTC_Set()
+    {
+      byte[] temp = new byte[8];
+      temp[1] = 0xF3;
+      temp[2] = Convert.ToByte(currentTime.Year - 2000);
+      temp[3] = Convert.ToByte(currentTime.Month);
+      temp[4] = Convert.ToByte(currentTime.Day);
+      temp[5] = Convert.ToByte(currentTime.Hour);
+      temp[6] = Convert.ToByte(currentTime.Minute);
+      temp[7] = Convert.ToByte(currentTime.Second);
+      Main.frm1.Serial_Data_Transmission(temp, 8, RACK_ID_Number_Sent, Shelf_ID_Number_Sent, 0x14);  //设置Divre状态
+
+    }
     //一键使能设置
     public void Button_Eanble_Click()
     {
@@ -2332,7 +2371,7 @@ namespace WindowsFormsApp1
         if (Set.Set1.TextboxThreshold_Setting[i].Text != string.Empty)
         {
           setStructure.ID = SendSetCMDID[i];
-          setStructure.Value = Convert.ToUInt32(Set.Set1.TextboxThreshold_Setting[i].Text);
+          setStructure.Value = Convert.ToInt32(Set.Set1.TextboxThreshold_Setting[i].Text);
 
           setStructure.ID = Reverse(setStructure.ID);
           setStructure.Value = Reverse(setStructure.Value);
@@ -2344,35 +2383,36 @@ namespace WindowsFormsApp1
           //None
         }
     }
-      //一键使能设置
-      public void Button_Eanble_Fw_Click()
-      {
-        byte[] temp = new byte[8];
-        for (int i = 0; i < 10; i++)
-          if (Set.Set1.Textbox_set_Calibration[i].Text != string.Empty)
-          {
-            setStructure.ID = SendSetCMDID1[i];
-            setStructure.Value = Convert.ToUInt32(Set.Set1.Textbox_set_Calibration[i].Text);
-            setStructure.ID = Reverse(setStructure.ID);
-            setStructure.Value = Reverse(setStructure.Value);
-            temp = Main.frm1.StructToBytes(setStructure);
+    //一键使能设置
+    public void Button_Eanble_Fw_Click()
+    {
+      byte[] temp = new byte[8];
+      for (int i = 0; i < 9; i++)
+        if (Set.Set1.Textbox_set_Calibration[i].Text != string.Empty)
+        {
+          setStructure.ID = SendSetCMDID1[i];
+          setStructure.Value = Convert.ToInt32(Set.Set1.Textbox_set_Calibration[i].Text);
+          setStructure.ID = Reverse(setStructure.ID);
+          setStructure.Value = Reverse(setStructure.Value);
+          temp = Main.frm1.StructToBytes(setStructure);
           //协议设置值唯一一个在buff[2]位置与我结构体不符合特殊处理
-            if (setStructure.ID == 0xA8)
-            {
-              temp[2] = temp[7];
-              temp[7] = 0;
-            }
-            else
-            {
-              //None
-            }
-            Main.frm1.Serial_Data_Transmission(temp, 8, RACK_ID_Number_Sent, Shelf_ID_Number_Sent, 0x12);  //设置Divre状态
+          if (i == 8)
+          {
+            temp[1] = 0xF2;
+            temp[2] = temp[7];
+            temp[7] = 0;
+            Main.frm1.Serial_Data_Transmission(temp, 8, RACK_ID_Number_Sent, Shelf_ID_Number_Sent, 0x13);  //设置Divre状态
           }
           else
           {
-            //None
+            Main.frm1.Serial_Data_Transmission(temp, 8, RACK_ID_Number_Sent, Shelf_ID_Number_Sent, 0x12);  //设置Divre状态
           }
-      }
+        }
+        else
+        {
+
+        }
+    }
   }
 }
 

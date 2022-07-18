@@ -554,9 +554,7 @@ namespace WindowsFormsApp1
     }
     public void Set_RACK_ShlefID()
     {
-
-
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 9; i++)
       {
         Textbox_Read_Calibration[i] = new TextBox();
         label_set_ID[i] = new Label();
@@ -660,10 +658,6 @@ namespace WindowsFormsApp1
         else if (i == 8)
         {
           label_set_ID[i].Text = "SOC_Set";
-        }
-        else if (i == 9)
-        {
-          label_set_ID[i].Text = "RTC_Set";
         }
         else
         {

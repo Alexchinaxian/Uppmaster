@@ -91,6 +91,26 @@ namespace WindowsFormsApp1
       }
       else if (uiComboBox1_Chip.Text.Equals("MSP430")) //更新MSP430
       {
+
+        //pingMSP芯片
+        var temp1 = new byte[7] { 0x01, 0x03, 0x60, 0x01, 0x01, 0x11, 0x22 };
+        Main.frm1.SendPacketAck(temp1, 7);
+        //需要下载的地址和文件大小
+        var temp_2 = new byte[16] { 0x01, 0x10, 0x60, 0x03, 0x03, 0x06, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x09, 0x3C, 0x11, 0x22 };
+        temp_2[9] = (byte)(Form_DownLoad.frm_2.file_len >> 24 & 0xFF);
+        temp_2[10] = (byte)(Form_DownLoad.frm_2.file_len >> 16 & 0xFF);
+        temp_2[11] = (byte)(Form_DownLoad.frm_2.file_len >> 8 & 0xFF);
+        temp_2[12] = (byte)(Form_DownLoad.frm_2.file_len & 0xFF);
+        Main.frm1.SendPacketAck(temp_2, 16);
+
+        Thread.Sleep(5);
+        //确认下载地址
+        temp_2 = new byte[7] { 0x01, 0x03, 0x60, 0x03, 0x03, 0x11, 0x22 };
+        Main.frm1.SendPacketAck(temp_2, 7);
+        Main.frm1.textBox1.AppendText("Packet acknowledgment successful" + "\r\n");
+        Thread.Sleep(5);
+
+        new Thread(Main.frm1.Send_Data).Start();
       }
       else
       {

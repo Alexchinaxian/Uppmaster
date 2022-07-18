@@ -150,6 +150,10 @@ namespace WindowsFormsApp1
                 {
                   label_set_ID[i].Text = "Project Code";
                 }
+                else if(i == 9)
+                {
+                    label_set_ID[i].Text = "RTC";
+                }
 
                 else
                 {
@@ -193,6 +197,10 @@ namespace WindowsFormsApp1
             {
               Button_8_Set();
             };
+            buttons_set[9].Click += delegate
+            {
+              Main.frm1.Buttons_RTC_Set();
+            };
       this.panel_Factory.Text = "Factory Setting";
         }
 		private void Button_0_Set()
@@ -202,7 +210,7 @@ namespace WindowsFormsApp1
       {
         GetSet_Moudle_Request1.ID = Convert.ToByte(Textbox_set_Calibration[0].Text);
         temp = Main.frm1.StructToBytes(GetSet_Moudle_Request1);
-        Main.frm1.Serial_Data_Transmission(temp, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0xFF);  //设置Divre状态
+        Main.frm1.Serial_Data_Transmission(temp, 8, 0xFF, 0xFF, 0xFF);  //设置Divre状态
       }
       else
       {
