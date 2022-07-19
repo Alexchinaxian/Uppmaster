@@ -1,5 +1,5 @@
 ﻿/*
- *版本号：uppermasterV001B001D004
+ *版本号：uppermasterV001B001D028
  * 日期：22年07月13日09时41分
  */
 using System;
@@ -28,6 +28,7 @@ namespace WindowsFormsApp1
     public int Signal_Send_Data = 0;
     public int count_ACK = 1;
     public int signle = 0;
+    public bool BlockingSend;
     byte[] Null = new byte[8];
     const byte ID_RACK1 = 0x01;
     const byte ID_RACK2 = 0x02;
@@ -48,6 +49,7 @@ namespace WindowsFormsApp1
     public byte Timer_Count;//时间定时器
     public byte CMD_CalibrationValue = 0x51;//阈值设置
     public byte CMD_ThreshholdValue = 0x50;//校准命令
+    public byte CMD_FactoryVaule = 0x52;
 
     public Byte[] Set_Imation_Reiving_Data = new byte[(255)]; //设置信息接收数据
     public static byte[] Flag_VoltageData = { 0x0A, 0x1D };
@@ -93,7 +95,9 @@ namespace WindowsFormsApp1
     {
       public Moudle_Temp moudle_Temp;  //温度
       public Summary summary;    //概要
-      public All_Parameter_Read parameter_Read;//设置信息读取
+      public FactorySetting FactorySetting_Read;//出厂设置信息读取
+      public CalibrationValue CalibrationValue_Read; //校准值读取
+      public ThreshholdValue ThreshholdValue_Read; //阈值读取
       public Moudle_Voltage voltage;//电压
     };
     public string[] SerialNuber_data = System.IO.Ports.SerialPort.GetPortNames();
@@ -101,7 +105,9 @@ namespace WindowsFormsApp1
     public Byte[] Rack1Shelf1Summary = new byte[136];      //摘要信息的创建
     public Byte[] Rack1Shelf1Voltage = new byte[136];   //电压信息
     public Byte[] Rack1Shelf1Temperature = new byte[136];//温度信息
-    public Byte[] Rack1Shelf1Parameter = new byte[240];   //温度信息
+    public Byte[]  Rack1Shelf1FactoryValue = new byte[150];   //设置信息
+    public Byte[] Rack1Shelf1ThreshholdValue = new byte[150];   //设置信息
+    public Byte[] Rack1Shelf1CalibrationValue = new byte[150];   //设置信息
     public struct SetStructure
     {
       public UInt16 ID;
@@ -170,7 +176,34 @@ namespace WindowsFormsApp1
     }
     //阈值信息
     [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
-    public struct All_Parameter_Read
+    public struct CalibrationValue
+    {
+      //参数校准参数
+      public Int16 TotalVol_1_Slope;
+      public Int16 TotalVol_1_Offset;
+      public Int16 TotalVol_2_Slope;
+      public Int16 TotalVol_2_Offset;
+      public Int16 TotalVol_3_Slope;
+      public Int16 TotalVol_3_Offset;
+      public Int16 Current_Slope;
+      public Int16 Current_Offset;
+      public UInt16 SOC;
+    };
+    [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct FactoryVaule
+    {
+      public byte Cell_Type;
+      public byte Cell_Parallel_Config;
+      public byte Shelf_Serial_Config;
+      public byte Cell_Temperature_Config;
+      public UInt16 Rated_Capacity;
+      public UInt16 Rated_Voltage;
+      public UInt32 BMS_SN;
+      public UInt32 Project_Code;
+      public byte Voltage_Platform;
+    }
+    [StructLayoutAttribute(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct ThreshholdValue
     {
       public UInt16 Cell_OV_Warning_Pre;
       public UInt16 Cell_OV_Warning;
@@ -211,51 +244,7 @@ namespace WindowsFormsApp1
       public UInt16 T_Diff_Warning_Pre;
       public UInt16 T_Diff_Warning;
       public UInt16 T_Diff_Fault;
-      //预留3组位置
-      public UInt16 reserved1;
-      public UInt16 reserved2;
-      public UInt16 reserved3;
-      public UInt16 reserved4;
-      public UInt16 reserved5;
-      public UInt16 reserved6;
-      public UInt16 reserved7;
-      public UInt16 reserved8;
-      public UInt16 reserved9;
-      //参数校准参数
-      public UInt16 TotalVol_1_Slope;
-      public UInt16 TotalVol_1_Offset;
-      public UInt16 TotalVol_2_Slope;
-      public UInt16 TotalVol_2_Offset;
-      public UInt16 TotalVol_3_Slope;
-      public UInt16 TotalVol_3_Offset;
-      public UInt16 Current_Slope;
-      public UInt16 Current_Offset;
-      public UInt16 SOC;
-      public UInt16 RTC_Y;
-      public UInt16 RTC_Mon;
-      public UInt16 RTC_D;
-      public UInt16 RTC_H;
-      public UInt16 RTC_Min;
-      public UInt16 RTC_S;
-      //预留
-      public UInt16 RE1;
-      public UInt16 RE2;
-      public UInt16 RE3;
-      public UInt16 RE4;
-      public UInt16 RE5;
-      public UInt16 RE6;
-
-      public byte Cell_Type;
-      public byte Cell_Parallel_Config;
-      public byte Shelf_Serial_Config;
-      public byte Cell_Temperature_Config;
-      public UInt16 Rated_Capacity;
-      public UInt16 Rated_Voltage;
-      public UInt32 BMS_SN;
-      public UInt32 Project_Code;
-
-    };
-
+    }
     //电压信息定义
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Moudle_Voltage
@@ -272,7 +261,6 @@ namespace WindowsFormsApp1
     public SHELF RACK1SHLE1;
     public SHELF RACK1SHLE2;
     public SHELF RACK1SHLF3;
-    public FactorySetting factorySetting;
 
     public byte[] SendSetCMDID = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,
                                 0x0D,0x0E,0x0F,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,
@@ -406,7 +394,7 @@ namespace WindowsFormsApp1
     }
     private void Timer()
     {
-      System.Timers.Timer t = new System.Timers.Timer(400);//实例化Timer类，设置间隔时间为500毫秒；
+      System.Timers.Timer t = new System.Timers.Timer(200);//实例化Timer类，设置间隔时间为500毫秒；
       t.Elapsed += new System.Timers.ElapsedEventHandler(Poll_Query);//到达时间的时候执行事件；
       t.AutoReset = true;//设置是执行一次（false）还是一直执行(true)；
       t.Enabled = true;//是否执行System.Timers.Timer.Elapsed事件；
@@ -476,7 +464,7 @@ namespace WindowsFormsApp1
     private void OpenChildFrom(Form childForm)
     {
       if (activeForm != null)
-        activeForm.Close();
+      activeForm.Close();
       childForm.TopLevel = false;
       childForm.FormBorderStyle = FormBorderStyle.None;
       childForm.Dock = DockStyle.Fill;
@@ -662,7 +650,7 @@ namespace WindowsFormsApp1
       Marshal.Copy(bytes, 0, structPtr, size);
       object obj = Marshal.PtrToStructure(structPtr, type);
       Marshal.FreeHGlobal(structPtr);
-      return obj; 
+      return obj;
     }
 
 
@@ -735,8 +723,32 @@ namespace WindowsFormsApp1
                 //CMD_All_Parameter_Read 设置信息
                 else if (receivedData[4] == CMD_All_Parameter_Read)
                 {
-                  Array.ConstrainedCopy(receivedData, 6, Rack1Shelf1Parameter, 0, receivedData.Length - 6);
-                  Parameter_Read(RACK1SHLE1, 0x0101);
+                  if (receivedData[5] == 0x4E)
+                  {
+                    Array.ConstrainedCopy(receivedData, 6, Rack1Shelf1ThreshholdValue, 0, receivedData.Length - 6);
+                    app_ThreshholdValue_Read(RACK1SHLE1, 0x0101);
+                  }
+                  else if (receivedData[5] == 0x10)
+                  {
+                    Array.ConstrainedCopy(receivedData, 6, Rack1Shelf1CalibrationValue, 0, receivedData.Length - 6);
+                    app_CalibrationValue_Read(RACK1SHLE1, 0x0101);
+                  }
+                  else if(receivedData[5] == 0x11)
+                  {
+                    Array.ConstrainedCopy(receivedData, 6, Rack1Shelf1FactoryValue, 0, receivedData.Length - 6);
+                    app_Factory_Setting(RACK1SHLE1, 0x0101);
+                  }
+                  else
+                  {
+
+                  }
+                  /*
+
+                  else
+                  {
+
+                  }
+                  */
                 }
                 else if (receivedData[4] == ParameterSet)
                 {
@@ -769,8 +781,8 @@ namespace WindowsFormsApp1
                 //CMD_All_Parameter_Read 设置信息
                 else if (receivedData[4] == CMD_All_Parameter_Read)
                 {
-                  Array.ConstrainedCopy(receivedData, 6, Rack1Shelf1Parameter, 0, receivedData.Length - 6);
-                  Parameter_Read(RACK1SHLE2, 0x0101);
+                  Array.ConstrainedCopy(receivedData, 6, Rack1Shelf1ThreshholdValue, 0, receivedData.Length - 6);
+                  //Parameter_Read(RACK1SHLE2, 0x0101);
                 }
                 break;
 
@@ -1054,148 +1066,185 @@ namespace WindowsFormsApp1
           break;
       }
     }
-    public void Parameter_Read(SHELF TEMP, int ID)
+        private void ShowFactory_setting(int a, int b)
     {
-      TEMP.parameter_Read = (All_Parameter_Read)BytesToDataStruct(Rack1Shelf1Parameter, typeof(All_Parameter_Read));
+      if (RACK_ID_Number_Sent == 1 && RACK_ID_Number_Sent == 1)
+      {
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[1].Text = RACK1SHLE1.FactorySetting_Read.BMS_SN.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[2].Text = RACK1SHLE1.FactorySetting_Read.Cell_Type.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[3].Text = RACK1SHLE1.FactorySetting_Read.Cell_Parallel_Config.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[4].Text = RACK1SHLE1.FactorySetting_Read.Shelf_Serial_Config.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[5].Text = RACK1SHLE1.FactorySetting_Read.Cell_Temperature_Config.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[6].Text = RACK1SHLE1.FactorySetting_Read.Rated_Capacity.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[7].Text = RACK1SHLE1.FactorySetting_Read.Rated_Voltage.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[8].Text = RACK1SHLE1.FactorySetting_Read.BMS_SN.ToString();
+        Factory_setting.factory_Setting.Textbox_Read_Calibration[9].Text = RACK1SHLE1.FactorySetting_Read.Project_Code.ToString();
+      }
+    }
+    public  void app_Factory_Setting(SHELF TEMP,int ID)
+    {
+      TEMP.FactorySetting_Read = (FactorySetting)BytesToDataStruct(Rack1Shelf1FactoryValue, typeof(FactorySetting));
+      TEMP.FactorySetting_Read.BMS_SN = Reverse(TEMP.FactorySetting_Read.BMS_SN);
+      TEMP.FactorySetting_Read.Project_Code = Reverse(TEMP.FactorySetting_Read.Project_Code);
+      TEMP.FactorySetting_Read.Rated_Capacity = Reverse(TEMP.FactorySetting_Read.Rated_Capacity);
+      TEMP.FactorySetting_Read.Rated_Voltage = Reverse(TEMP.FactorySetting_Read.Rated_Voltage);
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[1].Text = TEMP.FactorySetting_Read.BMS_SN.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[2].Text = TEMP.FactorySetting_Read.Cell_Type.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[3].Text = TEMP.FactorySetting_Read.Cell_Parallel_Config.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[4].Text = TEMP.FactorySetting_Read.Shelf_Serial_Config.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[5].Text = TEMP.FactorySetting_Read.Cell_Temperature_Config.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[6].Text = TEMP.FactorySetting_Read.Rated_Capacity.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[7].Text = TEMP.FactorySetting_Read.Rated_Voltage.ToString();
+      Factory_setting.factory_Setting.Textbox_Read_Calibration[8].Text = TEMP.FactorySetting_Read.BMS_SN.ToString();
+     // Factory_setting.factory_Setting.Textbox_Read_Calibration[9].Text = TEMP.FactorySetting_Read.Project_Code.ToString();
+    }
+    public void app_CalibrationValue_Read(SHELF TEMP,int ID)
+    {
+      TEMP.CalibrationValue_Read = (CalibrationValue)BytesToDataStruct(Rack1Shelf1CalibrationValue, typeof(CalibrationValue));
+      TEMP.CalibrationValue_Read.TotalVol_1_Slope = Reverse(TEMP.CalibrationValue_Read.TotalVol_1_Slope);
+      TEMP.CalibrationValue_Read.TotalVol_1_Offset = Reverse(TEMP.CalibrationValue_Read.TotalVol_1_Offset);
 
-      TEMP.parameter_Read.Cell_OV_Warning_Pre = Reverse(TEMP.parameter_Read.Cell_OV_Warning_Pre);
-      TEMP.parameter_Read.Cell_OV_Warning = Reverse(TEMP.parameter_Read.Cell_OV_Warning);
-      TEMP.parameter_Read.Cell_OV_Fault = Reverse(TEMP.parameter_Read.Cell_OV_Fault);
+      TEMP.CalibrationValue_Read.TotalVol_2_Slope = Reverse(TEMP.CalibrationValue_Read.TotalVol_2_Slope);
+      TEMP.CalibrationValue_Read.TotalVol_2_Offset = Reverse(TEMP.CalibrationValue_Read.TotalVol_2_Offset);
 
-      TEMP.parameter_Read.Battery_OV_Warning_Pre = Reverse(TEMP.parameter_Read.Battery_OV_Warning_Pre);
-      TEMP.parameter_Read.Battery_OV_Warning = Reverse(TEMP.parameter_Read.Battery_OV_Warning);
-      TEMP.parameter_Read.Battery_OV_Fault = Reverse(TEMP.parameter_Read.Battery_OV_Fault);
+      TEMP.CalibrationValue_Read.TotalVol_3_Slope = Reverse(TEMP.CalibrationValue_Read.TotalVol_3_Slope);
+      TEMP.CalibrationValue_Read.TotalVol_3_Offset = Reverse(TEMP.CalibrationValue_Read.TotalVol_3_Offset);
 
-      TEMP.parameter_Read.Chg_OCur_Warning_Pre = Reverse(TEMP.parameter_Read.Chg_OCur_Warning_Pre);
-      TEMP.parameter_Read.Chg_OCur_Warning = Reverse(TEMP.parameter_Read.Chg_OCur_Warning);
-      TEMP.parameter_Read.Chg_OCur_Fault = Reverse(TEMP.parameter_Read.Chg_OCur_Fault);
-
-      TEMP.parameter_Read.Chg_Utemp_Warning_Pre = Reverse(TEMP.parameter_Read.Chg_Utemp_Warning_Pre);
-      TEMP.parameter_Read.Chg_Utemp_Warning = Reverse(TEMP.parameter_Read.Chg_Utemp_Warning);
-      TEMP.parameter_Read.Chg_Utemp_Fault = Reverse(TEMP.parameter_Read.Chg_Utemp_Fault);
-
-      TEMP.parameter_Read.Chg_Otemp_Warning_Pre = Reverse(TEMP.parameter_Read.Chg_Otemp_Warning_Pre);
-      TEMP.parameter_Read.Chg_Otemp_Warning = Reverse(TEMP.parameter_Read.Chg_Otemp_Warning);
-      TEMP.parameter_Read.Chg_Otemp_Fault = Reverse(TEMP.parameter_Read.Chg_Otemp_Fault);
-
-      TEMP.parameter_Read.Cell_UV_Warning_Pre = Reverse(TEMP.parameter_Read.Cell_UV_Warning_Pre);
-      TEMP.parameter_Read.Cell_UV_Warning = Reverse(TEMP.parameter_Read.Cell_UV_Warning);
-      TEMP.parameter_Read.Cell_UV_Fault = Reverse(TEMP.parameter_Read.Cell_UV_Fault);
-
-      TEMP.parameter_Read.Battery_UV_Warning_Pre = Reverse(TEMP.parameter_Read.Battery_UV_Warning_Pre);
-      TEMP.parameter_Read.Battery_UV_Warning = Reverse(TEMP.parameter_Read.Battery_UV_Warning);
-      TEMP.parameter_Read.Battery_UV_Fault = Reverse(TEMP.parameter_Read.Battery_UV_Fault);
-
-      TEMP.parameter_Read.DisChg_OCur_Warning_Pre = Reverse(TEMP.parameter_Read.DisChg_OCur_Warning_Pre);
-      TEMP.parameter_Read.DisChg_OCur_Warning = Reverse(TEMP.parameter_Read.DisChg_OCur_Warning);
-      TEMP.parameter_Read.DisChg_OCur_Fault = Reverse(TEMP.parameter_Read.DisChg_OCur_Fault);
-
-      TEMP.parameter_Read.DisChg_UTemp_Warning_Pre = Reverse(TEMP.parameter_Read.DisChg_UTemp_Warning_Pre);
-      TEMP.parameter_Read.DisChg_UTemp_Warning = Reverse(TEMP.parameter_Read.DisChg_UTemp_Warning);
-      TEMP.parameter_Read.DisChg_UTemp_Fault = Reverse(TEMP.parameter_Read.DisChg_UTemp_Fault);
-
-      TEMP.parameter_Read.DisChg_Otemp_Warning_Pre = Reverse(TEMP.parameter_Read.DisChg_Otemp_Warning_Pre);
-      TEMP.parameter_Read.DisChg_Otemp_Warning = Reverse(TEMP.parameter_Read.DisChg_Otemp_Warning);
-      TEMP.parameter_Read.DisChg_Otemp_Fault = Reverse(TEMP.parameter_Read.DisChg_Otemp_Fault);
-
-      TEMP.parameter_Read.SOC_Low_Warning_Pre = Reverse(TEMP.parameter_Read.SOC_Low_Warning_Pre);
-      TEMP.parameter_Read.SOC_Low_Warning = Reverse(TEMP.parameter_Read.SOC_Low_Warning);
-      TEMP.parameter_Read.SOC_Low_Fault = Reverse(TEMP.parameter_Read.SOC_Low_Fault);
-
-      TEMP.parameter_Read.V_Diff_Warning_Pre = Reverse(TEMP.parameter_Read.V_Diff_Warning_Pre);
-      TEMP.parameter_Read.V_Diff_Warning = Reverse(TEMP.parameter_Read.V_Diff_Warning);
-      TEMP.parameter_Read.V_Diff_Fault = Reverse(TEMP.parameter_Read.V_Diff_Fault);
-
-      TEMP.parameter_Read.T_Diff_Warning_Pre = Reverse(TEMP.parameter_Read.T_Diff_Warning_Pre);
-      TEMP.parameter_Read.T_Diff_Warning = Reverse(TEMP.parameter_Read.T_Diff_Warning);
-      TEMP.parameter_Read.T_Diff_Fault = Reverse(TEMP.parameter_Read.T_Diff_Fault);
-
-      TEMP.parameter_Read.TotalVol_1_Slope = Reverse(TEMP.parameter_Read.TotalVol_1_Slope);
-      TEMP.parameter_Read.TotalVol_1_Offset = Reverse(TEMP.parameter_Read.TotalVol_1_Offset);
-
-      TEMP.parameter_Read.TotalVol_2_Slope = Reverse(TEMP.parameter_Read.TotalVol_2_Slope);
-      TEMP.parameter_Read.TotalVol_2_Offset = Reverse(TEMP.parameter_Read.TotalVol_2_Offset);
-
-      TEMP.parameter_Read.TotalVol_3_Slope = Reverse(TEMP.parameter_Read.TotalVol_3_Slope);
-      TEMP.parameter_Read.TotalVol_3_Offset = Reverse(TEMP.parameter_Read.TotalVol_3_Offset);
-
-      TEMP.parameter_Read.Current_Offset = Reverse(TEMP.parameter_Read.Current_Offset);
-      TEMP.parameter_Read.Current_Slope = Reverse(TEMP.parameter_Read.Current_Slope);
-
-      TEMP.parameter_Read.Rated_Capacity = Reverse(TEMP.parameter_Read.Rated_Capacity);
-      TEMP.parameter_Read.Rated_Voltage = Reverse(TEMP.parameter_Read.Rated_Voltage);
-      TEMP.parameter_Read.BMS_SN = Reverse(TEMP.parameter_Read.BMS_SN);
-      TEMP.parameter_Read.Project_Code = Reverse(TEMP.parameter_Read.Project_Code);
-
+      TEMP.CalibrationValue_Read.Current_Offset = Reverse(TEMP.CalibrationValue_Read.Current_Offset);
+      TEMP.CalibrationValue_Read.Current_Slope = Reverse(TEMP.CalibrationValue_Read.Current_Slope);
       switch (ID)
       {
         case 0x0101:
-          Set.Set1.TextboxThreshold_Read[0].Text = TEMP.parameter_Read.Cell_OV_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[1].Text = TEMP.parameter_Read.Cell_OV_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[2].Text = TEMP.parameter_Read.Cell_OV_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[3].Text = TEMP.parameter_Read.Battery_OV_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[4].Text = TEMP.parameter_Read.Battery_OV_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[5].Text = TEMP.parameter_Read.Battery_OV_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[6].Text = TEMP.parameter_Read.Chg_OCur_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[7].Text = TEMP.parameter_Read.Chg_OCur_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[8].Text = TEMP.parameter_Read.Chg_OCur_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[9].Text = TEMP.parameter_Read.Chg_Utemp_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[10].Text = TEMP.parameter_Read.Chg_Utemp_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[11].Text = TEMP.parameter_Read.Chg_Utemp_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[12].Text = TEMP.parameter_Read.Chg_Otemp_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[13].Text = TEMP.parameter_Read.Chg_Otemp_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[14].Text = TEMP.parameter_Read.Chg_Otemp_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[15].Text = TEMP.parameter_Read.Cell_UV_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[16].Text = TEMP.parameter_Read.Cell_UV_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[17].Text = TEMP.parameter_Read.Cell_UV_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[18].Text = TEMP.parameter_Read.Battery_UV_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[19].Text = TEMP.parameter_Read.Battery_UV_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[20].Text = TEMP.parameter_Read.Battery_UV_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[21].Text = TEMP.parameter_Read.DisChg_OCur_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[22].Text = TEMP.parameter_Read.DisChg_OCur_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[23].Text = TEMP.parameter_Read.DisChg_OCur_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[24].Text = TEMP.parameter_Read.DisChg_UTemp_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[25].Text = TEMP.parameter_Read.DisChg_UTemp_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[26].Text = TEMP.parameter_Read.DisChg_UTemp_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[27].Text = TEMP.parameter_Read.DisChg_Otemp_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[28].Text = TEMP.parameter_Read.DisChg_Otemp_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[29].Text = TEMP.parameter_Read.DisChg_Otemp_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[30].Text = TEMP.parameter_Read.SOC_Low_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[31].Text = TEMP.parameter_Read.SOC_Low_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[32].Text = TEMP.parameter_Read.SOC_Low_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[33].Text = TEMP.parameter_Read.V_Diff_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[34].Text = TEMP.parameter_Read.V_Diff_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[35].Text = TEMP.parameter_Read.V_Diff_Fault.ToString();
-
-          Set.Set1.TextboxThreshold_Read[36].Text = TEMP.parameter_Read.T_Diff_Warning_Pre.ToString();
-          Set.Set1.TextboxThreshold_Read[37].Text = TEMP.parameter_Read.T_Diff_Warning.ToString();
-          Set.Set1.TextboxThreshold_Read[38].Text = TEMP.parameter_Read.T_Diff_Fault.ToString();
           //校准参数设置
-          Set.Set1.Textbox_Read_Calibration[0].Text = TEMP.parameter_Read.TotalVol_1_Offset.ToString();
-          Set.Set1.Textbox_Read_Calibration[1].Text = TEMP.parameter_Read.TotalVol_1_Slope.ToString();
-          Set.Set1.Textbox_Read_Calibration[2].Text = TEMP.parameter_Read.TotalVol_2_Offset.ToString();
-          Set.Set1.Textbox_Read_Calibration[3].Text = TEMP.parameter_Read.TotalVol_2_Slope.ToString();
-          Set.Set1.Textbox_Read_Calibration[4].Text = TEMP.parameter_Read.TotalVol_3_Offset.ToString();
-          Set.Set1.Textbox_Read_Calibration[5].Text = TEMP.parameter_Read.TotalVol_3_Slope.ToString();
-          Set.Set1.Textbox_Read_Calibration[6].Text = TEMP.parameter_Read.Current_Offset.ToString();
-          Set.Set1.Textbox_Read_Calibration[7].Text = TEMP.parameter_Read.Current_Slope.ToString();
-          Set.Set1.Textbox_Read_Calibration[8].Text = TEMP.parameter_Read.SOC.ToString();
-          Set.Set1.Textbox_Read_Calibration[9].Text = TEMP.parameter_Read.RTC_Y.ToString() + TEMP.parameter_Read.RTC_Mon.ToString() +
-        TEMP.parameter_Read.RTC_D.ToString() + TEMP.parameter_Read.RTC_H.ToString() + TEMP.parameter_Read.RTC_Min.ToString() +
-             TEMP.parameter_Read.RTC_S.ToString();
+          Set.Set1.Textbox_Read_Calibration[1].Text = TEMP.CalibrationValue_Read.TotalVol_1_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[0].Text = TEMP.CalibrationValue_Read.TotalVol_1_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[3].Text = TEMP.CalibrationValue_Read.TotalVol_2_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[2].Text = TEMP.CalibrationValue_Read.TotalVol_2_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[5].Text = TEMP.CalibrationValue_Read.TotalVol_3_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[4].Text = TEMP.CalibrationValue_Read.TotalVol_3_Slope.ToString();
+          Set.Set1.Textbox_Read_Calibration[7].Text = TEMP.CalibrationValue_Read.Current_Offset.ToString();
+          Set.Set1.Textbox_Read_Calibration[6].Text = TEMP.CalibrationValue_Read.Current_Slope.ToString();
+         // Set.Set1.Textbox_Read_Calibration[8].Text = TEMP.CalibrationValue_Read.SOC.ToString();
+          /*
+          Set.Set1.Textbox_Read_Calibration[9].Text = TEMP.CalibrationValue_Read.RTC_Y.ToString() + TEMP.CalibrationValue_Read.RTC_Mon.ToString() +
+          TEMP.CalibrationValue_Read.RTC_D.ToString() + TEMP.CalibrationValue_Read.RTC_H.ToString() + TEMP.CalibrationValue_Read.RTC_Min.ToString() +
+             TEMP.CalibrationValue_Read.RTC_S.ToString();
+             */
+          break;
+      }
+  }
+    public void app_ThreshholdValue_Read(SHELF TEMP, int ID)
+    {
+      TEMP.ThreshholdValue_Read = (ThreshholdValue)BytesToDataStruct(Rack1Shelf1ThreshholdValue, typeof(ThreshholdValue));
 
+      TEMP.ThreshholdValue_Read.Cell_OV_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Cell_OV_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Cell_OV_Warning = Reverse(TEMP.ThreshholdValue_Read.Cell_OV_Warning);
+      TEMP.ThreshholdValue_Read.Cell_OV_Fault = Reverse(TEMP.ThreshholdValue_Read.Cell_OV_Fault);
 
+      TEMP.ThreshholdValue_Read.Battery_OV_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Battery_OV_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Battery_OV_Warning = Reverse(TEMP.ThreshholdValue_Read.Battery_OV_Warning);
+      TEMP.ThreshholdValue_Read.Battery_OV_Fault = Reverse(TEMP.ThreshholdValue_Read.Battery_OV_Fault);
+
+      TEMP.ThreshholdValue_Read.Chg_OCur_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Chg_OCur_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Chg_OCur_Warning = Reverse(TEMP.ThreshholdValue_Read.Chg_OCur_Warning);
+      TEMP.ThreshholdValue_Read.Chg_OCur_Fault = Reverse(TEMP.ThreshholdValue_Read.Chg_OCur_Fault);
+
+      TEMP.ThreshholdValue_Read.Chg_Utemp_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Chg_Utemp_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Chg_Utemp_Warning = Reverse(TEMP.ThreshholdValue_Read.Chg_Utemp_Warning);
+      TEMP.ThreshholdValue_Read.Chg_Utemp_Fault = Reverse(TEMP.ThreshholdValue_Read.Chg_Utemp_Fault);
+
+      TEMP.ThreshholdValue_Read.Chg_Otemp_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Chg_Otemp_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Chg_Otemp_Warning = Reverse(TEMP.ThreshholdValue_Read.Chg_Otemp_Warning);
+      TEMP.ThreshholdValue_Read.Chg_Otemp_Fault = Reverse(TEMP.ThreshholdValue_Read.Chg_Otemp_Fault);
+
+      TEMP.ThreshholdValue_Read.Cell_UV_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Cell_UV_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Cell_UV_Warning = Reverse(TEMP.ThreshholdValue_Read.Cell_UV_Warning);
+      TEMP.ThreshholdValue_Read.Cell_UV_Fault = Reverse(TEMP.ThreshholdValue_Read.Cell_UV_Fault);
+
+      TEMP.ThreshholdValue_Read.Battery_UV_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.Battery_UV_Warning_Pre);
+      TEMP.ThreshholdValue_Read.Battery_UV_Warning = Reverse(TEMP.ThreshholdValue_Read.Battery_UV_Warning);
+      TEMP.ThreshholdValue_Read.Battery_UV_Fault = Reverse(TEMP.ThreshholdValue_Read.Battery_UV_Fault);
+
+      TEMP.ThreshholdValue_Read.DisChg_OCur_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.DisChg_OCur_Warning_Pre);
+      TEMP.ThreshholdValue_Read.DisChg_OCur_Warning = Reverse(TEMP.ThreshholdValue_Read.DisChg_OCur_Warning);
+      TEMP.ThreshholdValue_Read.DisChg_OCur_Fault = Reverse(TEMP.ThreshholdValue_Read.DisChg_OCur_Fault);
+
+      TEMP.ThreshholdValue_Read.DisChg_UTemp_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.DisChg_UTemp_Warning_Pre);
+      TEMP.ThreshholdValue_Read.DisChg_UTemp_Warning = Reverse(TEMP.ThreshholdValue_Read.DisChg_UTemp_Warning);
+      TEMP.ThreshholdValue_Read.DisChg_UTemp_Fault = Reverse(TEMP.ThreshholdValue_Read.DisChg_UTemp_Fault);
+
+      TEMP.ThreshholdValue_Read.DisChg_Otemp_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.DisChg_Otemp_Warning_Pre);
+      TEMP.ThreshholdValue_Read.DisChg_Otemp_Warning = Reverse(TEMP.ThreshholdValue_Read.DisChg_Otemp_Warning);
+      TEMP.ThreshholdValue_Read.DisChg_Otemp_Fault = Reverse(TEMP.ThreshholdValue_Read.DisChg_Otemp_Fault);
+
+      TEMP.ThreshholdValue_Read.SOC_Low_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.SOC_Low_Warning_Pre);
+      TEMP.ThreshholdValue_Read.SOC_Low_Warning = Reverse(TEMP.ThreshholdValue_Read.SOC_Low_Warning);
+      TEMP.ThreshholdValue_Read.SOC_Low_Fault = Reverse(TEMP.ThreshholdValue_Read.SOC_Low_Fault);
+
+      TEMP.ThreshholdValue_Read.V_Diff_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.V_Diff_Warning_Pre);
+      TEMP.ThreshholdValue_Read.V_Diff_Warning = Reverse(TEMP.ThreshholdValue_Read.V_Diff_Warning);
+      TEMP.ThreshholdValue_Read.V_Diff_Fault = Reverse(TEMP.ThreshholdValue_Read.V_Diff_Fault);
+
+      TEMP.ThreshholdValue_Read.T_Diff_Warning_Pre = Reverse(TEMP.ThreshholdValue_Read.T_Diff_Warning_Pre);
+      TEMP.ThreshholdValue_Read.T_Diff_Warning = Reverse(TEMP.ThreshholdValue_Read.T_Diff_Warning);
+      TEMP.ThreshholdValue_Read.T_Diff_Fault = Reverse(TEMP.ThreshholdValue_Read.T_Diff_Fault);
+      switch (ID)
+      {
+        case 0x0101:
+          Set.Set1.TextboxThreshold_Read[0].Text = TEMP.ThreshholdValue_Read.Cell_OV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[1].Text = TEMP.ThreshholdValue_Read.Cell_OV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[2].Text = TEMP.ThreshholdValue_Read.Cell_OV_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[3].Text = TEMP.ThreshholdValue_Read.Battery_OV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[4].Text = TEMP.ThreshholdValue_Read.Battery_OV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[5].Text = TEMP.ThreshholdValue_Read.Battery_OV_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[6].Text = TEMP.ThreshholdValue_Read.Chg_OCur_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[7].Text = TEMP.ThreshholdValue_Read.Chg_OCur_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[8].Text = TEMP.ThreshholdValue_Read.Chg_OCur_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[9].Text = TEMP.ThreshholdValue_Read.Chg_Utemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[10].Text = TEMP.ThreshholdValue_Read.Chg_Utemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[11].Text = TEMP.ThreshholdValue_Read.Chg_Utemp_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[12].Text = TEMP.ThreshholdValue_Read.Chg_Otemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[13].Text = TEMP.ThreshholdValue_Read.Chg_Otemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[14].Text = TEMP.ThreshholdValue_Read.Chg_Otemp_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[15].Text = TEMP.ThreshholdValue_Read.Cell_UV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[16].Text = TEMP.ThreshholdValue_Read.Cell_UV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[17].Text = TEMP.ThreshholdValue_Read.Cell_UV_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[18].Text = TEMP.ThreshholdValue_Read.Battery_UV_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[19].Text = TEMP.ThreshholdValue_Read.Battery_UV_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[20].Text = TEMP.ThreshholdValue_Read.Battery_UV_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[21].Text = TEMP.ThreshholdValue_Read.DisChg_OCur_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[22].Text = TEMP.ThreshholdValue_Read.DisChg_OCur_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[23].Text = TEMP.ThreshholdValue_Read.DisChg_OCur_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[24].Text = TEMP.ThreshholdValue_Read.DisChg_UTemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[25].Text = TEMP.ThreshholdValue_Read.DisChg_UTemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[26].Text = TEMP.ThreshholdValue_Read.DisChg_UTemp_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[27].Text = TEMP.ThreshholdValue_Read.DisChg_Otemp_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[28].Text = TEMP.ThreshholdValue_Read.DisChg_Otemp_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[29].Text = TEMP.ThreshholdValue_Read.DisChg_Otemp_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[30].Text = TEMP.ThreshholdValue_Read.SOC_Low_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[31].Text = TEMP.ThreshholdValue_Read.SOC_Low_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[32].Text = TEMP.ThreshholdValue_Read.SOC_Low_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[33].Text = TEMP.ThreshholdValue_Read.V_Diff_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[34].Text = TEMP.ThreshholdValue_Read.V_Diff_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[35].Text = TEMP.ThreshholdValue_Read.V_Diff_Fault.ToString();
+
+          Set.Set1.TextboxThreshold_Read[36].Text = TEMP.ThreshholdValue_Read.T_Diff_Warning_Pre.ToString();
+          Set.Set1.TextboxThreshold_Read[37].Text = TEMP.ThreshholdValue_Read.T_Diff_Warning.ToString();
+          Set.Set1.TextboxThreshold_Read[38].Text = TEMP.ThreshholdValue_Read.T_Diff_Fault.ToString();
+          /*
+
+             */
 
           break;
       }
@@ -2044,30 +2093,10 @@ namespace WindowsFormsApp1
         comboBox_SerialNumber.Enabled = true;
       }
     }
-    private void ShowFactory_setting(int a, int b)
-    {
-      if (RACK_ID_Number_Sent == 1 && RACK_ID_Number_Sent == 1)
-      {
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[1].Text = RACK1SHLE1.parameter_Read.BMS_SN.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[2].Text = RACK1SHLE1.parameter_Read.Cell_Type.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[3].Text = RACK1SHLE1.parameter_Read.Cell_Parallel_Config.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[4].Text = RACK1SHLE1.parameter_Read.Shelf_Serial_Config.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[5].Text = RACK1SHLE1.parameter_Read.Cell_Temperature_Config.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[6].Text = RACK1SHLE1.parameter_Read.Rated_Capacity.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[7].Text = RACK1SHLE1.parameter_Read.Rated_Voltage.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[8].Text = RACK1SHLE1.parameter_Read.BMS_SN.ToString();
-        Factory_setting.factory_Setting.Textbox_Read_Calibration[9].Text = RACK1SHLE1.parameter_Read.Project_Code.ToString();
-      }
-    }
     private void uiSymbolButton1_Click(object sender, EventArgs e)
     {
-      Serial_Data_Transmission(Null, 8, RACK_ID_Number_Sent, Shelf_ID_Number_Sent, 0x11); //读取设置
-      ShowFactory_setting(RACK_ID_Number_Sent, Shelf_ID_Number_Sent);
       Factory_setting f = new Factory_setting();
-      ShowFactory_setting(RACK_ID_Number_Sent, Shelf_ID_Number_Sent);
-
       f.ShowDialog();
-
     }
     private void SetRepleFunction(byte temp)
     {
@@ -2259,26 +2288,41 @@ namespace WindowsFormsApp1
 
     public void ThreshholdValue_Set_Click()
     {
+      BlockingSend = true;
       byte[] ThreshholdValue = new byte[8];
-      ThreshholdValue[0] = CMD_ThreshholdValue;
+      ThreshholdValue[1] = CMD_ThreshholdValue;
       //读取阈值参数
       Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
-      Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
+      Thread.Sleep(250);//休眠时间
       //因为读设置有的值是通过summary传给上位机的
       Serial_Data_Transmission(ThreshholdValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
+      BlockingSend = false;
     }
     /*
      * 校准设置事件发生时调用
      */
     public void Read_CalibrationValue()
     {
+      BlockingSend = true;
       byte[] CalibrationValue = new byte[8];
       CalibrationValue[1] = CMD_CalibrationValue;
       Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
       Thread.Sleep(250);//休眠时间
       Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
-      Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x03);
+      BlockingSend =false;
     }
+    public void Read_FactoryVauleClick()
+    {
+      BlockingSend = true;
+      byte[] CalibrationValue = new byte[8];
+      CalibrationValue[1] = CMD_FactoryVaule;
+      Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
+      Thread.Sleep(250);//休眠时间
+      Serial_Data_Transmission(CalibrationValue, 8, Main.frm1.RACK_ID_Number_Sent, Main.frm1.Shelf_ID_Number_Sent, 0x11);
+      BlockingSend = false;
+
+    }
+
     public void Poll_Query(object source, System.Timers.ElapsedEventArgs e)
     {
       try
@@ -2299,7 +2343,7 @@ namespace WindowsFormsApp1
       }
 
       Timer_Count++;
-      if (Timer_Count == 16)
+      if (Timer_Count == 4)
       {
         Timer_Count = 1;
       }
@@ -2310,21 +2354,30 @@ namespace WindowsFormsApp1
     //单shelf
     public void Rotation_query(byte i)
     {
-      if( i == 5)
+      if (BlockingSend == true)
       {
-        Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x03);  //温度
-      }
-      else if(i == 10)
-      {
-        Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x02);  //读取电压
-      }
-      else if (i == 15){
-        Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x01);  //读取摘要
+        Timer_Count = 0;
       }
       else
       {
-        
+        if (i == 1)
+        {
+          Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x03);  //温度
+        }
+        else if (i == 2)
+        {
+          Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x02);  //读取电压
+        }
+        else if (i == 3)
+        {
+          Serial_Data_Transmission(Null, 8, 0x01, 0x01, 0x01);  //读取摘要
+        }
+        else
+        {
+
+        }
       }
+
     }
     public void chaxunzhiling(byte i)
     {
@@ -2386,6 +2439,7 @@ namespace WindowsFormsApp1
     //一键使能设置
     public void Button_Eanble_Fw_Click()
     {
+
       byte[] temp = new byte[8];
       for (int i = 0; i < 9; i++)
         if (Set.Set1.Textbox_set_Calibration[i].Text != string.Empty)

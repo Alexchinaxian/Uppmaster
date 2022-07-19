@@ -154,7 +154,7 @@ namespace WindowsFormsApp1
         label_set[i].Width = Width_Label;
         label_set[i].Height = Height_Label;
         label_set[i].Parent = uiTitlePanel1;
-        label_set[i].Font = new Font("Leelawadee", 9F);
+        label_set[i].Font = new Font("Leelawadee", 7F);
 
         TextboxThreshold_Setting[i].Name = "Voltage_Battery" + i.ToString();
         TextboxThreshold_Setting[i].Width = Width_Text;
@@ -203,160 +203,161 @@ namespace WindowsFormsApp1
         #region      //标签单独描述
         if (i == 0)
         {
-          label_set[i].Text = "Cell_OV_Warning_Pre";
+          label_set[i].Text = "Cell_OV_Warning_Pre"+ "(mV)";
         }
         else if (i == 1)
         {
-          label_set[i].Text = "Cell_OV_Warning";
+          label_set[i].Text = "Cell_OV_Warning" + "（mV）";
         }
         else if (i == 2)
         {
-          label_set[i].Text = "Cell_OV_Fault";
+          label_set[i].Text = "Cell_OV_Fault" + "（mV）";
         }
         else if (i == 3)
         {
-          label_set[i].Text = "Battery_OV_Warning_Pre";
+          label_set[i].Text = "Battery_OV_Warning_Pre" + "（0.1V）";
         }
         else if (i == 4)
         {
-          label_set[i].Text = "Battery_OV_Warning";
+          label_set[i].Text = "Battery_OV_Warning" + "（0.1V）";
         }
         else if (i == 5)
         {
-          label_set[i].Text = "Battery_OV_Fault";
+          label_set[i].Text = "Battery_OV_Fault" + "（0.1V)";
         }
         else if (i == 6)
         {
-          label_set[i].Text = "Chg_OCur_Warning_Pre";
+          label_set[i].Text = "Chg_OCur_Warning_Pre" + "(0.1A)";
         }
         else if (i == 7)
         {
-          label_set[i].Text = "Chg_OCur_Warning";
+          label_set[i].Text = "Chg_OCur_Warning" + "(0.1A)";
         }
         else if (i == 8)
         {
-          label_set[i].Text = "Chg_OCur_Fault";
+          label_set[i].Text = "Chg_OCur_Fault" + "(0.1A)";
         }
         else if (i == 9)
         {
-          label_set[i].Text = "Chg_UTemp_Pre";
+          label_set[i].Text = "Chg_UTemp_Pre" + "(°C)";
         }
         else if (i == 10)
         {
-          label_set[i].Text = "Chg_UTemp_Warning";
+          label_set[i].Text = "Chg_UTemp_Warning" + "(°C)";
+
         }
         else if (i == 11)
         {
-          label_set[i].Text = "Chg_UTemp_Fault";
+          label_set[i].Text = "Chg_UTemp_Fault" + "(  ℃)";
         }
         else if (i == 12)
         {
-          label_set[i].Text = "Chg_OTemp_Pre";
+          label_set[i].Text = "Chg_OTemp_Pre" + "(℃)";
         }
         else if (i == 13)
         {
-          label_set[i].Text = "Chg_OTemp_Warning";
+          label_set[i].Text = "Chg_OTemp_Warning" + "(℃)";
         }
         else if (i == 14)
         {
-          label_set[i].Text = "Chg_OTemp_Fault";
+          label_set[i].Text = "Chg_OTemp_Fault" + "(℃)";
         }
         else if (i == 15)
         {
-          label_set[i].Text = "Cell_UV_Pre";
+          label_set[i].Text = "Cell_UV_Pre" + "(mV)";
         }
         else if (i == 16)
         {
-          label_set[i].Text = "Cell_UV_Warning";
+          label_set[i].Text = "Cell_UV_Warning" + "(mV)";
         }
         else if (i == 17)
         {
-          label_set[i].Text = "Cell_UV_Fault";
+          label_set[i].Text = "Cell_UV_Fault" +  "(mV)";
         }
         else if (i == 18)
         {
-          label_set[i].Text = "Battery_UV_Pre";
+          label_set[i].Text = "Battery_UV_Pre" + "(0.1V)";
         }
         else if (i == 19)
         {
-          label_set[i].Text = "Battery_UV_Warning";
+          label_set[i].Text = "Battery_UV_Warning" +"(0.1V)";
         }
         else if (i == 20)
         {
-          label_set[i].Text = "Battery_UV_Fault";
+          label_set[i].Text = "Battery_UV_Fault" + "(0.1V)";
         }
         else if (i == 21)
         {
-          label_set[i].Text = "DisChg_OCur_Pre";
+          label_set[i].Text = "DisChg_OCur_Pre"+"(0.1A)";
         }
         else if (i == 22)
         {
-          label_set[i].Text = "DisChg_OCur_Warning";
+          label_set[i].Text = "DisChg_OCur_Warning"+"(0.1A)";
         }
         else if (i == 23)
         {
-          label_set[i].Text = "DisChg_OCur_Fault";
+          label_set[i].Text = "DisChg_OCur_Fault" + "(0.1A)";
         }
         else if (i == 24)
         {
-          label_set[i].Text = "DisChg_UTemp_Warning_Pre";
+          label_set[i].Text = "DisChg_UTemp_Warning_Pre" + "(℃)";
         }
         else if (i == 25)
         {
-          label_set[i].Text = "DisChg_UTemp_Warning";
+          label_set[i].Text = "DisChg_UTemp_Warning"+ "(℃)";
         }
 
         else if (i == 26)
         {
-          label_set[i].Text = "DisChg_UTemp_Fault";
+          label_set[i].Text = "DisChg_UTemp_Fault"+"(℃)"; 
         }
         else if (i == 27)
         {
-          label_set[i].Text = "DisChg_Otemp_Warning_Pre";
+          label_set[i].Text = "DisChg_Otemp_Warning_Pre"+"(℃)"; 
         }
         else if (i == 28)
         {
-          label_set[i].Text = "DisChg_Otemp_Warning";
+          label_set[i].Text = "DisChg_Otemp_Warning"+"(℃)" ;
         }
         else if (i == 29)
         {
-          label_set[i].Text = "DisChg_Otemp_Fault";
+          label_set[i].Text = "DisChg_Otemp_Fault"+"(℃)"; 
         }
         else if (i == 30)
         {
-          label_set[i].Text = "SOC_Low_Warning_Pre";
+          label_set[i].Text = "SOC_Low_Warning_Pre"+"(%)";
         }
         else if (i == 31)
         {
-          label_set[i].Text = "SOC_Low_Warning";
+          label_set[i].Text = "SOC_Low_Warning"+"(%)";
         }
         else if (i == 32)
         {
-          label_set[i].Text = "SOC_Low_Fault";
+          label_set[i].Text = "SOC_Low_Fault"+"(%)";
         }
         else if (i == 33)
         {
-          label_set[i].Text = "V_Diff_Warning_Pre";
+          label_set[i].Text = "V_Diff_Warning_Pre" +"(mV)";
         }
         else if (i == 34)
         {
-          label_set[i].Text = "V_Diff_Warning";
+          label_set[i].Text = "V_Diff_Warning" + "(mV)";
         }
         else if (i == 35)
         {
-          label_set[i].Text = "V_Diff_Fault";
+          label_set[i].Text = "V_Diff_Fault" + "(mV)";
         }
         else if (i == 36)
         {
-          label_set[i].Text = "T_Diff_Warning_Pre";
+          label_set[i].Text = "T_Diff_Warning_Pre"+ "(℃)";
         }
         else if (i == 37)
         {
-          label_set[i].Text = "T_Diff_Warning";
+          label_set[i].Text = "T_Diff_Warning"+ "(℃)";
         }
         else if (i == 38)
         {
-          label_set[i].Text = "T_Diff_Fault";
+          label_set[i].Text = "T_Diff_Fault"+ "(℃)";
         }
 
         #endregion
@@ -625,39 +626,39 @@ namespace WindowsFormsApp1
         }
         if (i == 0)
         {
-          label_set_ID[i].Text = "TotalVol_1_Slope";
+          label_set_ID[i].Text = "TotalVol_1_Slope"+"(0.001)";
         }
         else if (i == 1)
         {
-          label_set_ID[i].Text = "TotalVol_1_Offset";
+          label_set_ID[i].Text = "TotalVol_1_Offset"+ "(0.1V)";
         }
         else if (i == 2)
         {
-          label_set_ID[i].Text = "TotalVol_2_Slope";
+          label_set_ID[i].Text = "TotalVol_2_Slope"+"(0.001)";
         }
         else if (i == 3)
         {
-          label_set_ID[i].Text = "TotalVol_2_Offset";
+          label_set_ID[i].Text = "TotalVol_2_Offset"+"(0.1V)";
         }
         else if (i == 4)
         {
-          label_set_ID[i].Text = "TotalVol_3_Slope";
+          label_set_ID[i].Text = "TotalVol_3_Slope" + "(0.001)";
         }
         else if (i == 5)
         {
-          label_set_ID[i].Text = "TotalVol_3_Offset";
+          label_set_ID[i].Text = "TotalVol_3_Offset"+"(0.1V)";
         }
         else if (i == 6)
         {
-          label_set_ID[i].Text = "Current_Slope";
+          label_set_ID[i].Text = "Current_Slope" + "(0.001)";
         }
         else if (i == 7)
         {
-          label_set_ID[i].Text = "Current_Offset";
+          label_set_ID[i].Text = "Current_Offset"+"(0.1A)";
         }
         else if (i == 8)
         {
-          label_set_ID[i].Text = "SOC_Set";
+          label_set_ID[i].Text = "SOC_Set"+"(%)";
         }
         else
         {

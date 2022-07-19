@@ -46,7 +46,7 @@
       this.panel_Factory.Radius = 1;
       this.panel_Factory.RadiusSides = Sunny.UI.UICornerRadiusSides.None;
       this.panel_Factory.RectColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(170)))), ((int)(((byte)(50)))));
-      this.panel_Factory.Size = new System.Drawing.Size(377, 351);
+      this.panel_Factory.Size = new System.Drawing.Size(377, 381);
       this.panel_Factory.Style = Sunny.UI.UIStyle.Custom;
       this.panel_Factory.TabIndex = 10;
       this.panel_Factory.Text = "Factory_setting";
@@ -57,10 +57,10 @@
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(377, 351);
+      this.ClientSize = new System.Drawing.Size(377, 381);
       this.Controls.Add(this.panel_Factory);
-      this.MaximumSize = new System.Drawing.Size(393, 390);
-      this.MinimumSize = new System.Drawing.Size(393, 390);
+      this.MaximumSize = new System.Drawing.Size(393, 420);
+      this.MinimumSize = new System.Drawing.Size(393, 420);
       this.Name = "Factory_setting";
       this.Text = "Factory_setting";
       this.ResumeLayout(false);
