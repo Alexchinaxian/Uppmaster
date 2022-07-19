@@ -105,9 +105,9 @@ namespace WindowsFormsApp1
     public Byte[] Rack1Shelf1Summary = new byte[136];      //摘要信息的创建
     public Byte[] Rack1Shelf1Voltage = new byte[136];   //电压信息
     public Byte[] Rack1Shelf1Temperature = new byte[136];//温度信息
-    public Byte[]  Rack1Shelf1FactoryValue = new byte[150];   //设置信息
-    public Byte[] Rack1Shelf1ThreshholdValue = new byte[150];   //设置信息
-    public Byte[] Rack1Shelf1CalibrationValue = new byte[150];   //设置信息
+    public Byte[] Rack1Shelf1FactoryValue = new byte[150];   //出厂设置信息
+    public Byte[] Rack1Shelf1ThreshholdValue = new byte[150];   //阈值读取
+    public Byte[] Rack1Shelf1CalibrationValue = new byte[150];   //校准值
     public struct SetStructure
     {
       public UInt16 ID;
@@ -271,9 +271,6 @@ namespace WindowsFormsApp1
     public Main()
     {
       InitializeComponent();
-      x = this.Width;
-      y = this.Height;
-      setTag(this);
       RS485_select();
       frm1 = this;
       LoadInitialization();
@@ -302,69 +299,6 @@ namespace WindowsFormsApp1
       Panel_ChildSerialPort.Visible = false;
 
     }
-    #region 控件大小随窗体大小等比例缩放
-    private float x;//定义当前窗体的宽度
-    private float y;//定义当前窗体的高度
-
-    /// <summary>
-    /// 将控件的宽，高，左边距，顶边距和字体大小暂存到tag属性中
-    /// </summary>
-    /// <param name="cons">递归控件中的控件</param>
-    private void setTag(Control cons)
-    {
-      foreach (Control con in cons.Controls)
-      {
-        con.Tag = con.Width + ";" + con.Height + ";" + con.Left + ";" + con.Top + ";" + con.Font.Size;
-        if (con.Controls.Count > 0)
-        {
-          setTag(con);
-        }
-      }
-    }
-
-
-    /// <summary>
-    /// 重新设置控件的属性
-    /// </summary>
-    /// <param name="newx">设置后新的x坐标</param>
-    /// <param name="newy">设置后新的y坐标</param>
-    /// <param name="cons">递归控件中的控件</param>
-    private void setControls(float newx, float newy, Control cons)
-    {
-      //遍历窗体中的控件，重新设置控件的值
-      foreach (Control con in cons.Controls)
-      {
-        //获取控件的Tag属性值，并分割后存储字符串数组
-        if (con.Tag != null)
-        {
-          string[] mytag = con.Tag.ToString().Split(new char[] { ';' });
-          //根据窗体缩放的比例确定控件的值
-          con.Width = Convert.ToInt32(System.Convert.ToSingle(mytag[0]) * newx);//宽度
-          con.Height = Convert.ToInt32(System.Convert.ToSingle(mytag[1]) * newy);//高度
-          con.Left = Convert.ToInt32(System.Convert.ToSingle(mytag[2]) * newx);//左边距
-          con.Top = Convert.ToInt32(System.Convert.ToSingle(mytag[3]) * newy);//顶边距
-          Single currentSize = System.Convert.ToSingle(mytag[4]) * newy;//字体大小
-          con.Font = new Font(con.Font.Name, currentSize, con.Font.Style, con.Font.Unit);
-          if (con.Controls.Count > 0)
-          {
-            setControls(newx, newy, con);
-          }
-        }
-      }
-    }
-
-
-    /// <summary>
-    /// 窗体变化大小方法
-    /// </summary>
-    private void Form1_Resize(object sender, EventArgs e)
-    {
-      float newx = (this.Width) / x;
-      float newy = (this.Height) / y;
-      setControls(newx, newy, this);
-    }
-
-    #endregion
     /************************************************************************		
     *name:  RS485_select
     *describe: RS485配置文件

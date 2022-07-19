@@ -68,11 +68,6 @@ namespace WindowsFormsApp1
       public byte RESERVED4;
       public byte RESERVED5;
     };
-    //阈值设置发送
-    public struct Driver_Manual_Control
-    {
-
-    };
     Driver_Manual_control driver_Manual_Control;
     public void Set_Load_Init()
     {
@@ -200,6 +195,10 @@ namespace WindowsFormsApp1
           //None
         }
         #endregion
+        /*
+        2022-07-19 Alex
+        标签增加单位显示
+        */
         #region      //标签单独描述
         if (i == 0)
         {

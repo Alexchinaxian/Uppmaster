@@ -14,39 +14,39 @@ namespace WindowsFormsApp1
     {
     public static Factory_setting factory_Setting;
     public Factory_setting()
-        {
-            InitializeComponent();
-            Set_RACK_ShlefID();
-            factory_Setting = this;
-        }
-        const int Width_Label = 160; //50
-        const int Height_Label = 20;
-        const int Width_Text = 50;
-        const int Height_Text = 20;
-        const int Width_Button = 50;
-        const int Height_Button = 25;
-        const int Width_Panel = 920;
-        const int Number_Lines = 11;//每列的行数设置
-        const int Number_Line_1 = 3;//每列的行数设置
-        const int Number_Line_2 = 11;//每列的行数设置
-        const int Row_Spacing = 10; //行间距设置
-        const int Top_distance = 45; //顶部距离
-        public TextBox[] Textbox_set_FW = new TextBox[60]; //设备设置文本框
-        public TextBox[] Textbox_Read_Calibration = new TextBox[48];  //校准参数读取文本框
-        public TextBox[] Textbox_set_Calibration = new TextBox[60]; //校准参数设置文本框
-        public Label[] label_set_ID = new Label[60];	//设备状态文本
-        public Button[] buttons_set = new Button[60];//设置按钮
-				public struct Set_Moudle_Request
-				{
-					public byte ID;
-					public byte RESERVED1;
-					public byte RESERVED2;
-					public byte RESERVED3;
-					public byte RESERVED4;
-					public byte RESERVED5;
-					public byte RESERVED6;
-					public byte RESERVED7;
-			 	};
+    {
+        InitializeComponent();
+        Set_RACK_ShlefID();
+        factory_Setting = this;
+    }
+    const int Width_Label = 160; //50
+    const int Height_Label = 20;
+    const int Width_Text = 50;
+    const int Height_Text = 20;
+    const int Width_Button = 50;
+    const int Height_Button = 25;
+    const int Width_Panel = 920;
+    const int Number_Lines = 11;//每列的行数设置
+    const int Number_Line_1 = 3;//每列的行数设置
+    const int Number_Line_2 = 11;//每列的行数设置
+    const int Row_Spacing = 10; //行间距设置
+    const int Top_distance = 45; //顶部距离
+    public TextBox[] Textbox_set_FW = new TextBox[60]; //设备设置文本框
+    public TextBox[] Textbox_Read_Calibration = new TextBox[48];  //校准参数读取文本框
+    public TextBox[] Textbox_set_Calibration = new TextBox[60]; //校准参数设置文本框
+    public Label[] label_set_ID = new Label[60];	//设备状态文本
+    public Button[] buttons_set = new Button[60];//设置按钮
+    public struct Set_Moudle_Request
+    {
+      public byte ID;
+      public byte RESERVED1;
+      public byte RESERVED2;
+      public byte RESERVED3;
+      public byte RESERVED4;
+      public byte RESERVED5;
+      public byte RESERVED6;
+      public byte RESERVED7;
+    };
     Set_Moudle_Request GetSet_Moudle_Request1;
 public void Set_RACK_ShlefID()
 {
