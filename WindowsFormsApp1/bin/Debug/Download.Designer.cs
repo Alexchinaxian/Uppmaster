@@ -289,7 +289,7 @@ namespace WindowsFormsApp1
         private Sunny.UI.UIComboBox comboBox_Moudlenumber;
         private Sunny.UI.UIComboBox comboBox1;
         private Sunny.UI.UIMarkLabel uiMarkLabel1;
-        private Sunny.UI.UIRichTextBox textBox_tail;
+        public Sunny.UI.UIRichTextBox textBox_tail;
         private Sunny.UI.UIMarkLabel label1;
         public Sunny.UI.UISymbolButton button_OenBin;
         public Sunny.UI.UIProcessBar progressBar1;

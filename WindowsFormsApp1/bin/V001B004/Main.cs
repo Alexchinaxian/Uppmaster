@@ -274,7 +274,7 @@ namespace WindowsFormsApp1
       RS485_select();
       frm1 = this;
       LoadInitialization();
-     // Timer();
+      Timer();
       Control.CheckForIllegalCrossThreadCalls = false;
       Factory_setting f = new Factory_setting(); // 首次带参数打开的Bug
     }
@@ -811,22 +811,68 @@ namespace WindowsFormsApp1
       *************************************************************************/
     public void Send_Data()
     {
-      
+      byte COMMAND_SEND_DATA = 0xFF;
+      var COMMAND_GET_STATUS = new byte[4] { 0x03, 0x23, 0x23, 0xCC };
       var packetBuffer = new byte[134]; // 128 bytes data + 1 length + 1 opcode + 1 terminator
       var dataBuffer = new byte[128];
-      packetBuffer[0] = 0x01;
-      packetBuffer[1] = 0x10;
-      packetBuffer[2] = 0x60;
-      packetBuffer[3] = 0x06;
-      Main.frm1.SendPacketAck(packetBuffer, 134);
-      Thread.Sleep(300);//休眠时间
 
-      var temp_1 = new byte[7] { 0x01, 0x06, 0x60, 0x00, 0x0b, 0x11, 0x22 };
-      SendPacketAck(temp_1, 7);
-      textBox1.AppendText(" Completed!" + "\r\n");
-      MessageBox.Show(" Completed!" + "\r\n");
-      Form_DownLoad.frm_2.button_OenBin.Enabled = true;
-      Main.frm1.BlockingSend = false;
+      packetBuffer[0] = COMMAND_SEND_DATA;
+      packetBuffer[1] = 0;
+      int temp_value = 4;
+
+      using (Stream fs = openFileDialog1.OpenFile())
+      {
+        using (BinaryReader reader = new BinaryReader(fs))
+        {
+          while (reader.BaseStream.Position < reader.BaseStream.Length)
+          {
+            dataBuffer = new byte[128];
+            temp_value++;
+            var bytesRead = reader.BaseStream.Read(dataBuffer, 0, 128);
+            UInt32 len = (UInt32)reader.BaseStream.Length;
+            Form_DownLoad.frm_2.progressBar1.Maximum = (int)len;
+            if (signle == 1)
+            {
+              temp_value = temp_value - 1;
+              signle = 0;
+            }
+            else
+            {
+              if (bytesRead == 252)
+              {
+                //  Form_DownLoad.frm_2.progressBa_value(temp_value);
+                Array.ConstrainedCopy(dataBuffer, 0, packetBuffer, 4, 128);
+              }
+              else // readjust size (this is the last chunk!)
+              {
+                Array.ConstrainedCopy(dataBuffer, 0, packetBuffer, 4, 128);
+                //packetBuffer[0] = (byte)(bytesRead + 3); // readjust size byte
+                //  Form_DownLoad.frm_2.progressBa_value(99);
+              }
+            }
+            packetBuffer[0] = 0x01;
+            packetBuffer[1] = 0x10;
+            packetBuffer[2] = 0x60;
+            packetBuffer[3] = 0x06;
+            // packetBuffer[1] = getCheckSum(dataBuffer, 252);
+            // packetBuffer[2] = 0x24;
+            Main.frm1.SendPacketAck(packetBuffer, 134);
+            textBox1.AppendText("Downloading..." + "\r\n");
+            // Thread.Sleep(1);//休眠时间
+            // SendPacketAck(COMMAND_GET_STATUS, 4);
+            Form_DownLoad.frm_2.ProgressBa_value((int)reader.BaseStream.Position);
+          }
+        }
+        Thread.Sleep(300);//休眠时间
+
+        var temp_1 = new byte[7] { 0x01, 0x06, 0x60, 0x00, 0x0b, 0x11, 0x22 };
+        SendPacketAck(temp_1, 7);
+        textBox1.AppendText(" Completed!" + "\r\n");
+        MessageBox.Show(" Completed!" + "\r\n");
+        // Form_DownLoad.frm_2.progressBa_value(100);
+        Form_DownLoad.frm_2.button_OenBin.Enabled = true;
+
+      }
     }
 
     /************************************************************************		
@@ -1745,13 +1791,11 @@ namespace WindowsFormsApp1
     }
     private void Button5_DATA_OUTPUT_Click(object sender, EventArgs e)
     {
-     // OpenOrCloseSubmenu();
+
     }
 
     private void Button6_Download_Click(object sender, EventArgs e)
     {
-      Main.frm1.BlockingSend = true;
-
       OpenChildFrom(new Form_DownLoad());
     }
     private void button_Connect_Click(object sender, EventArgs e)
@@ -2356,11 +2400,6 @@ namespace WindowsFormsApp1
         {
 
         }
-    }
-
-    private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
-    {
-
     }
   }
 }

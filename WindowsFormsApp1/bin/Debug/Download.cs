@@ -66,32 +66,32 @@ namespace WindowsFormsApp1
     private void button_download_Click_1(object sender, EventArgs e)
     {
       button_OenBin.Enabled = false;
+      //关闭轮询
+      Main.frm1.BlockingSend = true;
       //芯片选择
       if (uiComboBox1_Chip.Text.Equals("TM4C")) //TM4C 更新程序
       {
         //pingTM4C芯片
-        var temp1 = new byte[7] { 0x01, 0x03, 0x60,0x01,0x01,0x11,0x22 };
-        Main.frm1.SendPacketAck(temp1, 7);
+        var temp1 = new byte[8] { 0x01, 0x03, 0x60,0x01,0x00,0x01,0x11,0x22 };
+        Main.frm1.SendPacketAck(temp1, 8);
         //需要下载的地址和文件大小
-        var temp_2 = new byte[16] { 0x01, 0x10, 0x60, 0x03, 0x03, 0x06,0x00,0x00, 0x40, 0x00,0x00, 0x00, 0x09, 0x3C,0x11,0x22 };
-        temp_2[9] = (byte)(Form_DownLoad.frm_2.file_len >> 24 & 0xFF);
-        temp_2[10] = (byte)(Form_DownLoad.frm_2.file_len >> 16 & 0xFF);
-        temp_2[11] = (byte)(Form_DownLoad.frm_2.file_len >> 8 & 0xFF);
-        temp_2[12] = (byte)(Form_DownLoad.frm_2.file_len & 0xFF);
-        Main.frm1.SendPacketAck(temp_2, 16);
+        var temp_2 = new byte[17] { 0x01, 0x10, 0x60, 0x03, 0x00,0x03, 0x06,0x00,0x00, 0x40, 0x00,0x00, 0x00, 0x09, 0x3C,0x11,0x22 };
+        temp_2[12] = (byte)(Form_DownLoad.frm_2.file_len >> 24 & 0xFF);
+        temp_2[13] = (byte)(Form_DownLoad.frm_2.file_len >> 16 & 0xFF);
+        temp_2[14] = (byte)(Form_DownLoad.frm_2.file_len >> 8 & 0xFF);
+        temp_2[15] = (byte)(Form_DownLoad.frm_2.file_len & 0xFF);
+        Main.frm1.SendPacketAck(temp_2, 17);
 
         Thread.Sleep(5);
         //确认下载地址
-        temp_2 = new byte[7] { 0x01, 0x03, 0x60,0x03,0x03,0x11, 0x22 };
-        Main.frm1.SendPacketAck(temp_2, 7);
+        temp_2 = new byte[8] { 0x01, 0x03, 0x60,0x03,0x00,0x03,0x11, 0x22 };
+        Main.frm1.SendPacketAck(temp_2, 8);
         Main.frm1.textBox1.AppendText("Packet acknowledgment successful" + "\r\n");
         Thread.Sleep(5);
-
         new Thread(Main.frm1.Send_Data).Start();
       }
       else if (uiComboBox1_Chip.Text.Equals("MSP430")) //更新MSP430
       {
-
         //pingMSP芯片
         var temp1 = new byte[7] { 0x01, 0x03, 0x60, 0x01, 0x01, 0x11, 0x22 };
         Main.frm1.SendPacketAck(temp1, 7);
@@ -109,7 +109,6 @@ namespace WindowsFormsApp1
         Main.frm1.SendPacketAck(temp_2, 7);
         Main.frm1.textBox1.AppendText("Packet acknowledgment successful" + "\r\n");
         Thread.Sleep(5);
-
         new Thread(Main.frm1.Send_Data).Start();
       }
       else
@@ -189,7 +188,7 @@ namespace WindowsFormsApp1
           bool FirstLineFlag;//起始行标志位
           bool FirstAddrFlag;//起始地址标志位
           szHexPath = textBox_OpenFile.Text;//HEX文件路径
-    // 读取并处理需要转换的hex文件
+          // 读取并处理需要转换的hex文件
           StreamReader HexReader = new StreamReader(szHexPath);
           FirstLineFlag = true;
           FirstAddrFlag = true;
@@ -265,8 +264,7 @@ namespace WindowsFormsApp1
           }
         }
         textBox_tail.Text = str.ToString();
-      button_download.Enabled = true;
-
+        button_download.Enabled = true;
         }
         catch (Exception ex)
         {
